@@ -2,7 +2,7 @@ from browser_use.controller.service import Controller
 from pydantic import BaseModel
 
 from job_agent.apply.application_agent import ApplicationAgent
-from job_agent.models import JobListing, ApplicantProfile, JobApplication, Resume
+from job_agent.models import JobListing, Candidate, JobApplication, Resume
 
 from browser_use.llm import ChatOpenAI
 from browser_use import Agent, BrowserSession
@@ -20,7 +20,7 @@ class BrowserApplicationAgent(ApplicationAgent):
         self.model = model
         self.headless = headless
 
-    async def apply(self, job_listing: JobListing, applicant_profile: ApplicantProfile) -> JobApplication:
+    async def apply(self, job_listing: JobListing, applicant_profile: Candidate) -> JobApplication:
         controller = Controller(output_model=ApplicationAgentResult)
         resume_text = _convert_resume_to_text(applicant_profile.resumes[0])
         llm = ChatOpenAI(model=self.model)
@@ -28,7 +28,7 @@ class BrowserApplicationAgent(ApplicationAgent):
         task = f"""
         Apply to the job listed below using the provided applicant profile and resume text. Follow these steps:
         1. Navigate to the job application URL: {job_listing.application_url}
-        2. Use the applicant’s real name ({applicant_profile.name}) and email ({applicant_profile.email}) when filling out forms.
+        2. Use the applicant’s real name ({applicant_profile.full_name}) and email ({applicant_profile.email}) when filling out forms.
         3. Fill out all required fields in the application form, using information from the applicant profile and resume text provided below.
         4. Tailor answers to align with the job description ({job_listing.description}) where possible, emphasizing relevant skills and experiences from the resume.
         5. Upload the resume file at {applicant_profile.resumes[0].file_path} if the application requires a file upload. Fill other information according to the applicant profile and resume text.

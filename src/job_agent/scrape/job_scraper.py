@@ -36,7 +36,7 @@ class HiringCafeJobScraper:
                 title=processed_job_data['core_job_title'],
                 company=processed_job_data['company_name'],
                 location=processed_job_data['formatted_workplace_location'],
-                url=data['apply_url'],
+                application_url=data['apply_url'],
                 source="hiring.cafe",
                 description=data['job_information']['description'],
                 posted_at=datetime.fromisoformat(processed_job_data['estimated_publish_date']),

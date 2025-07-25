@@ -10,7 +10,7 @@ async def test_hiring_cafe_job_scraper():
 
     # Assert
     assert result.id == job_id
-    assert result.url is not None
+    assert result.application_url is not None
     assert result.title is not None
     assert result.description is not None
     assert result.company is not None
