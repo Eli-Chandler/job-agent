@@ -7,20 +7,22 @@ from job_agent.models import JobListing, Candidate, JobApplication, Resume
 from browser_use.llm import ChatOpenAI
 from browser_use import Agent, BrowserSession
 
+from PyPDF2 import PdfReader
+
+
 class ApplicationAgentResult(BaseModel):
     notes: str
     success: bool
 
+
 class BrowserApplicationAgent(ApplicationAgent):
-    def __init__(
-            self,
-            model: str = "gpt-4.1",
-            headless: bool = True
-    ):
+    def __init__(self, model: str = "gpt-4.1", headless: bool = True):
         self.model = model
         self.headless = headless
 
-    async def apply(self, job_listing: JobListing, applicant_profile: Candidate) -> JobApplication:
+    async def apply(
+        self, job_listing: JobListing, applicant_profile: Candidate
+    ) -> JobApplication:
         controller = Controller(output_model=ApplicationAgentResult)
         resume_text = _convert_resume_to_text(applicant_profile.resumes[0])
         llm = ChatOpenAI(model=self.model)
@@ -52,7 +54,6 @@ class BrowserApplicationAgent(ApplicationAgent):
         history = await agent.run()
         result: ApplicationAgentResult = history.final_result()
 
-
         return JobApplication(
             id=123,
             job_listing_id=job_listing.id,
@@ -61,7 +62,6 @@ class BrowserApplicationAgent(ApplicationAgent):
             notes=result.notes,
         )
 
-from PyPDF2 import PdfReader
 
 def _convert_resume_to_text(resume: Resume) -> str:
     reader = PdfReader(resume.file_path)

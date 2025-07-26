@@ -6,11 +6,18 @@ from typing import Optional, List
 
 from sqlalchemy import String, DateTime, Enum as SqlEnum, ForeignKey, Text
 
-from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column, synonym
+from sqlalchemy.orm import (
+    declarative_base,
+    relationship,
+    Mapped,
+    mapped_column,
+    synonym,
+)
 
 Base = declarative_base()
 
 # Note I'm using properties/setters and synonyms, I'm aware hybrid properties exist, but they SUCK
+
 
 class Candidate(Base):
     __tablename__ = "candidate"
@@ -19,16 +26,42 @@ class Candidate(Base):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     phone: Mapped[str] = mapped_column(String(50), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
+    )
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    socials: Mapped[List[CandidateSocialLink]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    resumes: Mapped[List[Resume]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    cover_letters: Mapped[List[CoverLetter]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    applications: Mapped[List[JobApplication]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
+    socials: Mapped[List[CandidateSocialLink]] = relationship(
+        back_populates="candidate", cascade="all, delete-orphan"
+    )
+    resumes: Mapped[List[Resume]] = relationship(
+        back_populates="candidate", cascade="all, delete-orphan"
+    )
+    cover_letters: Mapped[List[CoverLetter]] = relationship(
+        back_populates="candidate", cascade="all, delete-orphan"
+    )
+    applications: Mapped[List[JobApplication]] = relationship(
+        back_populates="candidate", cascade="all, delete-orphan"
+    )
 
-    created_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    def __init__(
+        self,
+        first_name: str,
+        last_name: str,
+        phone: str,
+        email: str,
+        hashed_password: str,
+    ) -> None:
+        super().__init__()
+
+        self.first_name = first_name
+        self.last_name = last_name
+        self.phone = phone
+        self.email = email
+        self.hashed_password = hashed_password
 
     @property
     def full_name(self) -> str:
@@ -40,10 +73,33 @@ class CandidateSocialLink(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    link: Mapped[str] = mapped_column(String(100), nullable=False)
+    _link: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"), nullable=True)
+    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"))
     candidate: Mapped[Candidate] = relationship(back_populates="socials")
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    def __init__(self, name: str, link: str) -> None:
+        super().__init__()
+
+        self.name = name
+        self._link = link
+
+    def _update(self):
+        self.updated_at = datetime.utcnow()
+
+    @property
+    def link(self) -> str:
+        return self._link
+
+    @link.setter
+    def link(self, link: str) -> None:
+        self._link = link
+        self._update()
+
+    link = synonym(name="_link", descriptor=link)
 
 
 class Resume(Base):
@@ -53,13 +109,26 @@ class Resume(Base):
     _name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     key: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"), nullable=True)
+    candidate_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("candidate.id"), nullable=True
+    )
     candidate: Mapped[Candidate] = relationship(back_populates="resumes")
 
-    applications_used_for: Mapped[List[JobApplication]] = relationship(back_populates="used_resume")
+    applications_used_for: Mapped[List[JobApplication]] = relationship(
+        back_populates="used_resume"
+    )
 
-    created_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    def __init__(
+        self,
+        name: str,
+        key: str,
+    ):
+        super().__init__()
+        self._name = name
+        self.key = key
 
     def _update(self):
         self.updated_at = datetime.utcnow()
@@ -73,7 +142,7 @@ class Resume(Base):
         self._name = new_name
         self._update()
 
-    name = synonym('_name', descriptor=name)
+    name = synonym("_name", descriptor=name)
 
 
 class CoverLetter(Base):
@@ -83,13 +152,22 @@ class CoverLetter(Base):
     _name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     key: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"), nullable=True)
+    candidate_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("candidate.id"), nullable=True
+    )
     candidate: Mapped[Candidate] = relationship(back_populates="cover_letters")
 
-    applications_used_for: Mapped[List[JobApplication]] = relationship(back_populates="used_cover_letter")
+    applications_used_for: Mapped[List[JobApplication]] = relationship(
+        back_populates="used_cover_letter"
+    )
 
-    created_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    def __init__(self, name: str, key: str):
+        super().__init__()
+        self._name = name
+        self.key = key
 
     def _update(self):
         self.updated_at = datetime.utcnow()
@@ -103,7 +181,7 @@ class CoverLetter(Base):
         self._name = new_name
         self._update()
 
-    name = synonym('_name', descriptor=name)
+    name = synonym("_name", descriptor=name)
 
 
 class JobListing(Base):
@@ -117,8 +195,31 @@ class JobListing(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     posted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    scraped_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default_factory=datetime.utcnow)
+    scraped_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    # I don't think this is needed
+    # applications: Mapped[List[JobApplication]] = relationship(back_populates="job_listing")
+
+    def __init__(
+        self,
+        title: str,
+        company: str,
+        application_url: str,
+        description: str,
+        source: Optional[str] = None,
+        posted_at: Optional[datetime] = None,
+        scraped_at: Optional[datetime] = None,
+    ):
+        super().__init__()
+        self.title = title
+        self.company = company
+        self.application_url = application_url
+        self.description = description
+        self.source = source
+        self.posted_at = posted_at
+        if scraped_at is not None:
+            self.scraped_at = scraped_at
 
 
 class JobApplicationStatus(str, Enum):
@@ -134,17 +235,45 @@ class JobApplication(Base):
     __tablename__ = "job_application"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    _application_status: Mapped[JobApplicationStatus] = mapped_column(SqlEnum(JobApplicationStatus), default=JobApplicationStatus.PENDING)
+    _application_status: Mapped[JobApplicationStatus] = mapped_column(
+        SqlEnum(JobApplicationStatus), default=JobApplicationStatus.PENDING
+    )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"), nullable=True)
+    candidate_id: Mapped[Optional[int]] = mapped_column(ForeignKey("candidate.id"))
     candidate: Mapped[Candidate] = relationship(back_populates="applications")
 
-    used_resume_id: Mapped[Optional[int]] = mapped_column(ForeignKey("resume.id"), nullable=True)
-    used_resume: Mapped[Optional[Resume]] = relationship(back_populates="applications_used_for")
+    job_listing_id: Mapped[Optional[int]] = mapped_column(ForeignKey("job_listing.id"))
+    job_listing: Mapped[JobListing] = relationship()
 
-    used_cover_letter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("cover_letter.id"), nullable=True)
-    used_cover_letter: Mapped[Optional[CoverLetter]] = relationship(back_populates="applications_used_for")
+    used_resume_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("resume.id"), nullable=True
+    )
+    used_resume: Mapped[Optional[Resume]] = relationship(
+        back_populates="applications_used_for"
+    )
+
+    used_cover_letter_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("cover_letter.id"), nullable=True
+    )
+    used_cover_letter: Mapped[Optional[CoverLetter]] = relationship(
+        back_populates="applications_used_for"
+    )
+
+    def __init__(
+        self,
+        candidate: Candidate,
+        job_listing: JobListing,
+        used_resume: Optional[Resume] = None,
+        used_cover_letter: Optional[CoverLetter] = None,
+        notes: Optional[str] = None,
+    ):
+        super().__init__()
+        self.candidate = candidate
+        self.job_listing = job_listing
+        self.used_resume = used_resume
+        self.used_cover_letter = used_cover_letter
+        self.notes = notes
 
     def _update(self):
         self.updated_at = datetime.utcnow()
@@ -158,4 +287,4 @@ class JobApplication(Base):
         self._application_status = new_application_status
         self._update()
 
-    application_status = synonym('_application_status', descriptor=application_status)
+    application_status = synonym("_application_status", descriptor=application_status)
