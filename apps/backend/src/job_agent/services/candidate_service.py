@@ -182,8 +182,11 @@ class CandidateService:
             social = CandidateSocialLink(
                 name=request.name, link=str(request.link), candidate=candidate
             )
+            self._db.add(social)
             await self._db.commit()
             # await self._db.refresh(social)
+
+        print(social.id)
 
         return CandidateSocialLinkDTO.from_model(social)
 
