@@ -1,8 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter
-from fastapi.params import Depends
-from pydantic import EmailStr
+from fastapi import Depends
 
 from api.auth import create_access_token
 
@@ -27,18 +26,18 @@ async def register(
     return await service.create_user(request)
 
 
-@auth_router.post("/auth/token")
+@auth_router.post("/token")
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: CandidateService = Depends(get_candidate_service),
 ):
     login_request = CandidateLoginRequest(
-        email=EmailStr.validate_python(form_data.username), password=form_data.password
+        email=form_data.username, password=form_data.password
     )
     result = await service.get_user_by_email_and_password(login_request)
     access_token = create_access_token(
         {
-            "sub": result.id,
+            "sub": str(result.id),
         }
     )
 

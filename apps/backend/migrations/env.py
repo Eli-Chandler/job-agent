@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, create_engine
+from sqlalchemy import create_engine
 from sqlalchemy import pool
 
 from alembic import context
@@ -19,7 +19,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from alembic import context
-from job_agent.models import Base,Candidate, CandidateSocialLink, Resume, CoverLetter, JobListing, JobApplication, JobApplicationStatus
+from job_agent.models import (
+    Base,
+)
 from api.config import settings
 
 target_metadata = Base.metadata

@@ -1,13 +1,11 @@
+from PyPDF2 import PdfReader
+from browser_use import Agent
 from browser_use.controller.service import Controller
+from browser_use.llm import ChatOpenAI
 from pydantic import BaseModel
 
 from job_agent.apply.application_agent import ApplicationAgent
 from job_agent.models import JobListing, Candidate, JobApplication, Resume
-
-from browser_use.llm import ChatOpenAI
-from browser_use import Agent, BrowserSession
-
-from PyPDF2 import PdfReader
 
 
 class ApplicationAgentResult(BaseModel):

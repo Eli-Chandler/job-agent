@@ -8,6 +8,8 @@ from datetime import datetime
 import logging
 import json
 
+import urllib.parse
+
 # class JobScraper(ABC):
 #     @abstractmethod
 #     def scrape(self, someargs) -> List[JobListing]:
@@ -19,11 +21,11 @@ class HiringCafeJobScraper:
     _NEXT_BUILD_ID: str = "Z1keoTDB1W9ibFKAL7z8R"
 
     async def scrape_job(self, job_id: str) -> JobListing:
-        if self._session is None:
+        if HiringCafeJobScraper._session is None:
             HiringCafeJobScraper._session = aiohttp.ClientSession()
 
-        async with self._session.get(
-            f"https://hiring.cafe/_next/data/{self._NEXT_BUILD_ID}/job/{job_id}%3D%3D.json",
+        async with HiringCafeJobScraper._session.get(
+            f"https://hiring.cafe/_next/data/{self._NEXT_BUILD_ID}/job/{urllib.parse.quote_plus(job_id)}.json",
             # headers=headers,
         ) as response:
             j = await response.json()
@@ -33,13 +35,11 @@ class HiringCafeJobScraper:
             processed_job_data = data["v5_processed_job_data"]
 
             return JobListing(
-                id=job_id,
                 title=processed_job_data["core_job_title"],
                 company=processed_job_data["company_name"],
-                location=processed_job_data["formatted_workplace_location"],
                 application_url=data["apply_url"],
-                source="hiring.cafe",
                 description=data["job_information"]["description"],
+                source="hiring.cafe",
                 posted_at=datetime.fromisoformat(
                     processed_job_data["estimated_publish_date"]
                 ),
