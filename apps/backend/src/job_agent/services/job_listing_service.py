@@ -1,44 +1,12 @@
-from typing import Optional
-
-from pydantic import BaseModel, HttpUrl
+from pydantic import HttpUrl
 from urllib.parse import urlparse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
-from job_agent.models import JobListing
-
-from datetime import datetime
 
 from job_agent.services.exceptions import UnsupportedJobUrlException
-
-
-class ScrapeJobListingRequest(BaseModel):
-    job_url: HttpUrl
-
-
-class JobListingDTO(BaseModel):
-    id: int
-    title: str
-    application_url: str
-    source: Optional[str]
-    description: Optional[str]
-    posted_at: Optional[datetime]
-    scraped_at: datetime
-    updated_at: datetime
-
-    @classmethod
-    def from_model(cls, job_listing: JobListing):
-        return cls(
-            id=job_listing.id,
-            title=job_listing.title,
-            application_url=job_listing.application_url,
-            source=job_listing.source,
-            description=job_listing.description,
-            posted_at=job_listing.posted_at,
-            scraped_at=job_listing.scraped_at,
-            updated_at=job_listing.updated_at,
-        )
+from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest
 
 
 class JobService:

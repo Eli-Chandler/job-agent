@@ -102,6 +102,15 @@ class SocialLinkNotFoundException(HTTPException):
 # ===
 
 
-class CandidateEmailTakenException(HTTPException):
+class CandidateEmailConflictException(HTTPException):
     def __init__(self):
         super().__init__(status_code=HTTP_409_CONFLICT, detail="Email already in use")
+
+
+class ResumeNameConflictException(HTTPException):
+    def __init__(self, name: Optional[str] = None):
+        message = "You already have a resume with this name"
+        if name is not None:
+            message = f"You already have a resume with name {name}"
+
+        super().__init__(status_code=HTTP_409_CONFLICT, detail=message)

@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends
 
 from api.auth import get_current_user_id
-from job_agent.services.dependencies import get_job_application_service
+from api.dependencies import get_job_application_service
 
 from job_agent.services.job_application_service import (
-    JobApplicationDTO,
     JobApplicationService,
-    CreateJobApplicationRequest,
 )
+from job_agent.services.schemas import CreateJobApplicationRequest, JobApplicationDTO
 
 job_application_router = APIRouter()
 

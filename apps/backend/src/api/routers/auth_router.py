@@ -6,12 +6,10 @@ from fastapi import Depends
 from api.auth import create_access_token
 
 from job_agent.services.candidate_service import (
-    CandidateDTO,
-    CreateCandidateRequest,
     CandidateService,
-    CandidateLoginRequest,
 )
-from job_agent.services.dependencies import get_candidate_service
+from job_agent.services.schemas import CreateCandidateRequest, CandidateLoginRequest, CandidateDTO
+from api.dependencies import get_candidate_service
 
 from fastapi.security import OAuth2PasswordRequestForm
 

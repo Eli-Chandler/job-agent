@@ -2,12 +2,10 @@ from fastapi import APIRouter, Depends, Response, status
 
 from api.auth import get_current_user_id
 from job_agent.services.candidate_service import (
-    CandidateDTO,
     CandidateService,
-    CandidateSocialLinkDTO,
-    AddOrUpdateSocialRequest,
 )
-from job_agent.services.dependencies import get_candidate_service
+from job_agent.services.schemas import AddOrUpdateSocialRequest, CandidateDTO, CandidateSocialLinkDTO
+from api.dependencies import get_candidate_service
 
 me_router = APIRouter()
 

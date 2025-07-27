@@ -15,5 +15,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=dotenv_path)
 
+    s3_endpoint_url: str
+    s3_access_key_id: str
+    s3_secret_access_key: str
+    s3_region_name: str
 
 settings = Settings()

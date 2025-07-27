@@ -2,7 +2,10 @@ import pytest
 from datetime import datetime
 from pydantic import HttpUrl
 
-from job_agent.services.job_listing_service import JobService, ScrapeJobListingRequest, JobListingDTO
+from job_agent.services.job_listing_service import (
+    JobService,
+)
+from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest
 from job_agent.models import JobListing
 from job_agent.services.exceptions import UnsupportedJobUrlException
 

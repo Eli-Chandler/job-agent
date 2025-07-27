@@ -1,6 +1,7 @@
+import pytest
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
 
-
+@pytest.mark.asyncio
 async def test_hiring_cafe_job_scraper():
     # Arrange
     scraper = HiringCafeJobScraper()
@@ -15,4 +16,3 @@ async def test_hiring_cafe_job_scraper():
     assert result.title is not None
     assert result.description is not None
     assert result.company is not None
-

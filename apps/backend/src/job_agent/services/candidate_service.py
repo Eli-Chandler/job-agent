@@ -1,108 +1,37 @@
+import asyncio
+import uuid
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, HttpUrl
+from io import BytesIO
+
+import pytest
+import pytest_asyncio
+from pydantic import EmailStr
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from job_agent.models import Candidate, CandidateSocialLink, Resume, CoverLetter
+from job_agent.models import Candidate, CandidateSocialLink, Resume
 import bcrypt
 
 from job_agent.services.exceptions import (
     CandidateNotFoundException,
     WrongCredentialsException,
-    CandidateEmailTakenException,
+    CandidateEmailConflictException,
     SocialLinkNotFoundException,
+    ResumeNameConflictException,
 )
+from job_agent.services.s3_file_uploader import S3FileUploader
+from job_agent.services.schemas import CreateCandidateRequest, CandidateLoginRequest, AddOrUpdateSocialRequest, \
+    CandidateDTO, CandidateSocialLinkDTO, UploadResumeRequest, ResumeDTO
 
-
-class CreateCandidateRequest(BaseModel):
-    first_name: str
-    last_name: str
-    phone: str
-    email: EmailStr
-    password: str
-
-
-class CandidateLoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class AddOrUpdateSocialRequest(BaseModel):
-    name: str
-    link: HttpUrl
-
-
-class CandidateDTO(BaseModel):
-    id: int
-    first_name: str
-    last_name: str
-    full_name: str
-    phone: str
-    email: str
-    # socials: list["CandidateSocialLinkDTO"]
-    # resumes: list["ResumeDTO"]
-    # cover_letters: list["CoverLetterDTO"]
-
-    @classmethod
-    def from_model(cls, model: Candidate) -> "CandidateDTO":
-        return cls(
-            id=model.id,
-            first_name=model.first_name,
-            last_name=model.last_name,
-            full_name=model.full_name,
-            phone=model.phone,
-            email=model.email,
-        )
-
-
-class CandidateSocialLinkDTO(BaseModel):
-    id: int
-    name: str
-    link: str
-
-    @classmethod
-    def from_model(cls, model: CandidateSocialLink) -> "CandidateSocialLinkDTO":
-        return cls(
-            id=model.id,
-            name=model.name,
-            link=model.link,
-        )
-
-
-class ResumeDTO(BaseModel):
-    id: int
-    name: str
-    key: str
-
-    @classmethod
-    def from_model(cls, model: Resume) -> "ResumeDTO":
-        return cls(
-            id=model.id,
-            name=model.name,
-            key=model.key,
-        )
-
-
-class CoverLetterDTO(BaseModel):
-    id: int
-    name: str
-    key: str
-
-    @classmethod
-    def from_model(cls, model: CoverLetter) -> "CoverLetterDTO":
-        return cls(
-            id=model.id,
-            name=model.name,
-            key=model.key,
-        )
-
+from PyPDF2 import PdfReader
 
 class CandidateService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, s3_file_uploader: S3FileUploader):
         self._db = db
+        self._s3_file_uploader = s3_file_uploader
 
     async def _get_candidate_by_email(
         self, email: str | EmailStr
@@ -141,7 +70,7 @@ class CandidateService:
         existing_candidate = await self._get_candidate_by_email(request.email)
 
         if existing_candidate is not None:
-            raise CandidateEmailTakenException()
+            raise CandidateEmailConflictException()
 
         candidate = Candidate(
             first_name=request.first_name,
@@ -186,8 +115,6 @@ class CandidateService:
             await self._db.commit()
             # await self._db.refresh(social)
 
-        print(social.id)
-
         return CandidateSocialLinkDTO.from_model(social)
 
     async def delete_social_link(self, candidate_id: int, social_id: int) -> None:
@@ -207,6 +134,35 @@ class CandidateService:
         await self._db.delete(social)
         await self._db.commit()
 
+    async def upload_resume(self, candidate_id: int, request: UploadResumeRequest) -> ResumeDTO:
+        query = (
+            select(Candidate)
+            .where(Candidate.id == candidate_id)
+            .options(selectinload(Candidate.resumes))
+        )
+        result = await self._db.execute(query)
+        candidate: Candidate | None = result.scalar_one_or_none()
+
+        if candidate is None:
+            raise CandidateNotFoundException(candidate_id=candidate_id)
+
+        if any(resume.name == request.name for resume in candidate.resumes):
+            raise ResumeNameConflictException(request.name)
+
+        stored_file = await self._s3_file_uploader.upload(request.file)
+
+        resume = Resume(
+            name=request.name,
+            stored_file=stored_file,
+            text_content=await _extract_text_content_from_pdf(request.file.data),
+            candidate=candidate,
+        )
+
+        self._db.add(resume)
+        await self._db.commit()
+
+        return ResumeDTO.from_model(resume)
+
 
 def _hash_password(plain_password: str) -> str:
     salt = bcrypt.gensalt()
@@ -218,3 +174,13 @@ def _verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
+
+async def _extract_text_content_from_pdf(pdf: bytes):
+    def read() -> str:
+        reader = PdfReader(stream=BytesIO(pdf))
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        return text
+
+    return await asyncio.to_thread(read)

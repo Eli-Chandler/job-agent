@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends
 
 
-from job_agent.services.dependencies import get_job_listing_service
+from api.dependencies import get_job_listing_service
 
 from job_agent.services.job_listing_service import (
-    ScrapeJobListingRequest,
-    JobListingDTO,
     JobService,
 )
+from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest
 
 job_listing_router = APIRouter()
 

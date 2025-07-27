@@ -1,49 +1,17 @@
 from typing import Optional
 
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from job_agent.models import JobApplication, Candidate, JobListing, Resume, CoverLetter
-from job_agent.services.candidate_service import ResumeDTO, CoverLetterDTO
+from job_agent.services.schemas import CreateJobApplicationRequest, JobApplicationDTO
 from job_agent.services.exceptions import (
     CandidateNotFoundException,
     JobListingNotFoundException,
     CoverLetterNotFoundException,
     ResumeNotFoundException,
 )
-from job_agent.services.job_listing_service import JobListingDTO
-
-
-class CreateJobApplicationRequest(BaseModel):
-    job_listing_id: int
-    resume_id: int
-    cover_letter_id: Optional[int] = None
-
-
-class JobApplicationDTO(BaseModel):
-    id: int
-    job_listing: JobListingDTO
-    used_resume: Optional[ResumeDTO]
-    used_cover_letter: Optional[CoverLetterDTO]
-    notes: Optional[str]
-
-    @classmethod
-    def from_model(cls, job_application: JobApplication):
-        return cls(
-            id=job_application.id,
-            job_listing=JobListingDTO.from_model(job_application.job_listing),
-            used_resume=ResumeDTO.from_model(job_application.used_resume)
-            if job_application.used_resume
-            else None,
-            used_cover_letter=CoverLetterDTO.from_model(
-                job_application.used_cover_letter
-            )
-            if job_application.used_cover_letter
-            else None,
-            notes=job_application.notes,
-        )
 
 
 class JobApplicationService:

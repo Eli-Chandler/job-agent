@@ -1,32 +1,51 @@
+from io import FileIO, BufferedReader, BytesIO
+
 import pytest
-from pydantic import EmailStr, HttpUrl
+from fastapi import UploadFile
+from pydantic import HttpUrl
+from typing import Generator
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from job_agent.services.candidate_service import (
     CandidateService,
+)
+from job_agent.services.s3_file_uploader import S3FileUploader
+from job_agent.services.schemas import (
     CreateCandidateRequest,
     CandidateLoginRequest,
     AddOrUpdateSocialRequest,
+    UploadResumeRequest,
+    FileContent,
 )
 from job_agent.models import Candidate, CandidateSocialLink
 from job_agent.services.exceptions import (
     CandidateNotFoundException,
     WrongCredentialsException,
-    CandidateEmailTakenException,
+    CandidateEmailConflictException,
     SocialLinkNotFoundException,
 )
 
 from job_agent.services.candidate_service import _hash_password
 
+@pytest.fixture
+def service(db_session: AsyncSession, s3_file_uploader: S3FileUploader):
+    return CandidateService(db_session, s3_file_uploader)
+
+@pytest.fixture
+def sample_resume() -> bytes:
+    with open("tests/data/resume-sample.pdf", "rb") as f:
+        return f.read()
+
 @pytest.mark.asyncio
-async def test_create_user__should_work__when_email_not_taken(db_session):
+async def test_create_user__should_work__when_email_not_taken(service, db_session):
     # Arrange
-    service = CandidateService(db_session)
     request = CreateCandidateRequest(
         first_name="Jane",
         last_name="Doe",
         phone="1234567890",
         email="jane@example.com",
-        password="securepassword"
+        password="securepassword",
     )
 
     # Act
@@ -43,15 +62,14 @@ async def test_create_user__should_work__when_email_not_taken(db_session):
 
 
 @pytest.mark.asyncio
-async def test_create_user__should_raise__when_email_taken(db_session):
+async def test_create_user__should_raise__when_email_taken(service, db_session):
     # Arrange
-    service = CandidateService(db_session)
     existing = Candidate(
         first_name="John",
         last_name="Smith",
         phone="0000000000",
         email="john@example.com",
-        hashed_password="hashed"
+        hashed_password="hashed",
     )
     db_session.add(existing)
     await db_session.commit()
@@ -61,16 +79,16 @@ async def test_create_user__should_raise__when_email_taken(db_session):
         last_name="Smith",
         phone="0000000000",
         email="john@example.com",
-        password="password"
+        password="password",
     )
 
     # Act & Assert
-    with pytest.raises(CandidateEmailTakenException):
+    with pytest.raises(CandidateEmailConflictException):
         await service.create_user(request)
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_and_password__should_work(db_session):
+async def test_get_user_by_email_and_password__should_work(service, db_session):
     # Arrange
     hashed = _hash_password("password123")
     candidate = Candidate(
@@ -78,12 +96,11 @@ async def test_get_user_by_email_and_password__should_work(db_session):
         last_name="Wong",
         phone="555-0101",
         email="alice@example.com",
-        hashed_password=hashed
+        hashed_password=hashed,
     )
     db_session.add(candidate)
     await db_session.commit()
 
-    service = CandidateService(db_session)
     request = CandidateLoginRequest(email="alice@example.com", password="password123")
 
     # Act
@@ -96,10 +113,9 @@ async def test_get_user_by_email_and_password__should_work(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_and_password__should_raise__when_email_not_found(db_session):
-    # Arrange
-    service = CandidateService(db_session)
-
+async def test_get_user_by_email_and_password__should_raise__when_email_not_found(
+    service, db_session,
+):
     # Act & Assert
     with pytest.raises(CandidateNotFoundException):
         await service.get_user_by_email_and_password(
@@ -108,42 +124,43 @@ async def test_get_user_by_email_and_password__should_raise__when_email_not_foun
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_and_password__should_raise__when_password_wrong(db_session):
+async def test_get_user_by_email_and_password__should_raise__when_password_wrong(
+    service, db_session,
+):
     # Arrange
     from job_agent.services.candidate_service import _hash_password
+
     candidate = Candidate(
         first_name="Wrong",
         last_name="Pass",
         phone="1231231234",
         email="wrongpass@example.com",
-        hashed_password=_hash_password("rightpassword")
+        hashed_password=_hash_password("rightpassword"),
     )
     db_session.add(candidate)
     await db_session.commit()
 
-    service = CandidateService(db_session)
-
     # Act & Assert
     with pytest.raises(WrongCredentialsException):
         await service.get_user_by_email_and_password(
-            CandidateLoginRequest(email="wrongpass@example.com", password="wrongpassword")
+            CandidateLoginRequest(
+                email="wrongpass@example.com", password="wrongpassword"
+            )
         )
 
 
 @pytest.mark.asyncio
-async def test_get_candidate_by_id__should_work(db_session):
+async def test_get_candidate_by_id__should_work(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Emily",
         last_name="Chan",
         phone="1234567890",
         email="emily@example.com",
-        hashed_password="irrelevant"
+        hashed_password="irrelevant",
     )
     db_session.add(candidate)
     await db_session.commit()
-
-    service = CandidateService(db_session)
 
     # Act
     dto = await service.get_candidate_by_id(candidate.id)
@@ -153,30 +170,28 @@ async def test_get_candidate_by_id__should_work(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_candidate_by_id__should_raise__when_not_found(db_session):
-    # Arrange
-    service = CandidateService(db_session)
-
+async def test_get_candidate_by_id__should_raise__when_not_found(service, db_session):
     # Act & Assert
     with pytest.raises(CandidateNotFoundException):
         await service.get_candidate_by_id(999999)
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_add_when_not_exists(db_session):
+async def test_add_or_update_social_link__should_add_when_not_exists(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Anna",
         last_name="Taylor",
         phone="9999999999",
         email="anna@example.com",
-        hashed_password="irrelevant"
+        hashed_password="irrelevant",
     )
     db_session.add(candidate)
     await db_session.commit()
 
-    service = CandidateService(db_session)
-    request = AddOrUpdateSocialRequest(name="LinkedIn", link=HttpUrl("https://linkedin.com/in/anna"))
+    request = AddOrUpdateSocialRequest(
+        name="LinkedIn", link=HttpUrl("https://linkedin.com/in/anna")
+    )
 
     # Act
     dto = await service.add_or_update_social_link(candidate.id, request)
@@ -186,28 +201,31 @@ async def test_add_or_update_social_link__should_add_when_not_exists(db_session)
     assert dto.link == "https://linkedin.com/in/anna"
 
     query = await db_session.execute(
-        CandidateSocialLink.__table__.select().where(CandidateSocialLink.candidate_id == candidate.id)
+        CandidateSocialLink.__table__.select().where(
+            CandidateSocialLink.candidate_id == candidate.id
+        )
     )
     socials = query.fetchall()
     assert any(s.name == "LinkedIn" for s in socials)
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_update_when_exists(db_session):
+async def test_add_or_update_social_link__should_update_when_exists(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Liam",
         last_name="Wright",
         phone="1010101010",
         email="liam@example.com",
-        hashed_password="irrelevant"
+        hashed_password="irrelevant",
     )
-    social = CandidateSocialLink(name="GitHub", link="https://github.com/old", candidate=candidate)
+    social = CandidateSocialLink(
+        name="GitHub", link="https://github.com/old", candidate=candidate
+    )
     db_session.add(candidate)
     db_session.add(social)
     await db_session.commit()
 
-    service = CandidateService(db_session)
     request = AddOrUpdateSocialRequest(name="GitHub", link="https://github.com/new")
 
     # Act
@@ -222,10 +240,11 @@ async def test_add_or_update_social_link__should_update_when_exists(db_session):
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_raise__when_candidate_not_found(db_session):
+async def test_add_or_update_social_link__should_raise__when_candidate_not_found(service, db_session):
     # Arrange
-    service = CandidateService(db_session)
-    request = AddOrUpdateSocialRequest(name="LinkedIn", link=HttpUrl("https://linkedin.com"))
+    request = AddOrUpdateSocialRequest(
+        name="LinkedIn", link=HttpUrl("https://linkedin.com")
+    )
 
     # Act & Assert
     with pytest.raises(CandidateNotFoundException):
@@ -233,21 +252,21 @@ async def test_add_or_update_social_link__should_raise__when_candidate_not_found
 
 
 @pytest.mark.asyncio
-async def test_delete_social_link__should_work__when_exists(db_session):
+async def test_delete_social_link__should_work__when_exists(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Eli",
         last_name="Fox",
         phone="1111111111",
         email="eli@example.com",
-        hashed_password="irrelevant"
+        hashed_password="irrelevant",
     )
-    social = CandidateSocialLink(name="Twitter", link="https://twitter.com/eli", candidate=candidate)
+    social = CandidateSocialLink(
+        name="Twitter", link="https://twitter.com/eli", candidate=candidate
+    )
     db_session.add(candidate)
     db_session.add(social)
     await db_session.commit()
-
-    service = CandidateService(db_session)
 
     # Act
     await service.delete_social_link(candidate.id, social.id)
@@ -258,10 +277,35 @@ async def test_delete_social_link__should_work__when_exists(db_session):
 
 
 @pytest.mark.asyncio
-async def test_delete_social_link__should_raise__when_not_found(db_session):
-    # Arrange
-    service = CandidateService(db_session)
-
+async def test_delete_social_link__should_raise__when_not_found(service, db_session):
     # Act & Assert
     with pytest.raises(SocialLinkNotFoundException):
         await service.delete_social_link(1234, 5678)
+
+@pytest.mark.asyncio
+async def test_upload_resume__should_work__when_valid(service, db_session, sample_resume):
+    # Arrange
+    existing = Candidate(
+        first_name="John",
+        last_name="Smith",
+        phone="0000000000",
+        email="john@example.com",
+        hashed_password="hashed",
+    )
+    db_session.add(existing)
+    await db_session.commit()
+
+    request = UploadResumeRequest(
+        name="My Resume",
+        file=FileContent(
+            data=sample_resume,
+            content_type="application/pdf"
+        )
+    )
+
+    # Act
+    dto = await service.upload_resume(existing.id, request)
+
+    # Assert
+    assert dto.id is not None
+    assert dto.name == "My Resume"

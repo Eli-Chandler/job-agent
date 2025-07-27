@@ -120,8 +120,11 @@ class Resume(Base):
     __tablename__ = "resume"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    _name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    key: Mapped[str] = mapped_column(String(100), nullable=False)
+    _name: Mapped[str] = mapped_column(String(50), nullable=False)
+    text_content: Mapped[str] = mapped_column(Text, nullable=False)
+
+    stored_file_id: Mapped[int] = mapped_column(ForeignKey("stored_file.id"), nullable=False)
+    stored_file: Mapped[StoredFile] = relationship()
 
     candidate_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("candidate.id"), nullable=False
@@ -139,12 +142,14 @@ class Resume(Base):
         default=datetime.utcnow, nullable=False
     )
 
-    def __init__(self, name: str, key: str, candidate: Candidate):
+    def __init__(self, name: str, stored_file: "StoredFile", text_content: str, candidate: Candidate):
         super().__init__()
 
         self._name = name
-        self.key = key
+        self.text_content = text_content
         self.candidate = candidate
+        self.stored_file = stored_file
+
 
     def _update(self):
         self.updated_at = datetime.utcnow()
@@ -315,3 +320,18 @@ class JobApplication(Base):
         self._update()
 
     application_status = synonym("_application_status", descriptor=application_status)  # type: ignore
+
+
+class StoredFile(Base):
+    __tablename__ = "stored_file"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    bucket: Mapped[str] = mapped_column(String(100), nullable=False)
+    content_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    uploaded_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
+
+    def __init__(self, key: str, bucket: str, content_type: Optional[str] = None):
+        super().__init__()
+        self.key = key
+        self.bucket = bucket
+        self.content_type = content_type
