@@ -27,8 +27,6 @@ async def test_get_presigned_url(presigned_url_service, s3_client, s3_config, sa
     assert "test-bucket/test" in presigned_url
     assert "Signature" in presigned_url
 
-    print(presigned_url)
-
     async with aiohttp.ClientSession() as session:
         async with session.get(presigned_url) as response:
             assert response.status == 200
