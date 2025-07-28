@@ -32,11 +32,6 @@ from job_agent.services.candidate_service import _hash_password
 def service(db_session: AsyncSession, s3_file_uploader: S3FileUploader):
     return CandidateService(db_session, s3_file_uploader)
 
-@pytest.fixture
-def sample_resume() -> bytes:
-    with open("tests/data/resume-sample.pdf", "rb") as f:
-        return f.read()
-
 @pytest.mark.asyncio
 async def test_create_user__should_work__when_email_not_taken(service, db_session):
     # Arrange

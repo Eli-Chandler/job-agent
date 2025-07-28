@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 import asyncio
 import aioboto3
 import botocore
+import pytest
 import pytest_asyncio
 import docker
 import socket
@@ -253,3 +254,9 @@ async def db_session(db_connection):
     async_session = async_sessionmaker(bind=db_connection, expire_on_commit=False)
     async with async_session() as session:
         yield session
+
+
+@pytest.fixture
+def sample_resume() -> bytes:
+    with open("tests/data/resume-sample.pdf", "rb") as f:
+        return f.read()
