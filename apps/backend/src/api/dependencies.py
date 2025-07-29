@@ -1,5 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from types_aiobotocore_s3 import S3Client
 
 from job_agent.scrape.dependencies import get_job_scraper
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
@@ -15,12 +16,31 @@ import aioboto3
 from botocore.config import Config
 from functools import lru_cache
 
+from job_agent.services.s3_file_uploader import S3FileUploader
 
+@lru_cache
+async def get_s3_client() -> S3Client:
+    client = await session.client(
+        "s3",
+        endpoint_url=settings.s3_endpoint_url,
+        aws_access_key_id=settings.s3_access_key_id,
+        aws_secret_access_key=settings.s3_secret_access_key,
+        region_name=settings.s3_region_name,
+        config=Config(s3={"addressing_style": "path"})
+    )
+    return client
+
+async def get_s3_file_uploader(
+        db: AsyncSession = Depends(get_s3_client),
+        s3_client: S3Client = Depends(get_s3_client),
+):
+    return S3FileUploader(db, s3_client, settings.s3_bucket_name)
 
 async def get_candidate_service(
     db: AsyncSession = Depends(get_session),
+    s3_file_uploader: S3FileUploader = Depends(get_s3_file_uploader),
 ) -> CandidateService:
-    return CandidateService(db)
+    return CandidateService(db, s3_file_uploader)
 
 
 async def get_job_listing_service(
@@ -32,21 +52,10 @@ async def get_job_listing_service(
 
 async def get_job_application_service(
     db: AsyncSession = Depends(get_session),
-):
+) -> JobApplicationService:
     return JobApplicationService(db)
 
 session = aioboto3.Session(
 
 )
 
-@lru_cache
-async def get_s3_client():
-    client = await session.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        aws_access_key_id=settings.s3_access_key_id,
-        aws_secret_access_key=settings.s3_secret_access_key,
-        region_name=settings.s3_region_name,
-        config=Config(s3={"addressing_style": "path"})
-    )
-    return client

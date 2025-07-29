@@ -23,14 +23,21 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import * as axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   AddOrUpdateSocialRequest,
   CandidateDTO,
   CandidateSocialLinkDTO,
+  ErrorModel,
   HTTPValidationError
 } from '.././models';
 
-import { customAxios } from '.././custom-axios';
 
 
 
@@ -39,33 +46,31 @@ import { customAxios } from '.././custom-axios';
  * @summary Get Me
  */
 export const getMeMeGet = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CandidateDTO>> => {
     
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<CandidateDTO>(
-      {url: `/me/`, method: 'GET', signal
-    },
-      );
-    }
-  
+    
+    return axios.default.get(
+      `/me/`,options
+    );
+  }
+
 
 export const getGetMeMeGetQueryKey = () => {
     return [`/me/`] as const;
     }
 
     
-export const getGetMeMeGetQueryOptions = <TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, }
+export const getGetMeMeGetQueryOptions = <TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = AxiosError<ErrorModel>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetMeMeGetQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeMeGet>>> = ({ signal }) => getMeMeGet(signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeMeGet>>> = ({ signal }) => getMeMeGet({ signal, ...axiosOptions });
 
       
 
@@ -75,39 +80,39 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type GetMeMeGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMeMeGet>>>
-export type GetMeMeGetQueryError = unknown
+export type GetMeMeGetQueryError = AxiosError<ErrorModel>
 
 
-export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = unknown>(
+export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = AxiosError<ErrorModel>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMeMeGet>>,
           TError,
           Awaited<ReturnType<typeof getMeMeGet>>
         > , 'initialData'
-      >, }
+      >, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = unknown>(
+export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = AxiosError<ErrorModel>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMeMeGet>>,
           TError,
           Awaited<ReturnType<typeof getMeMeGet>>
         > , 'initialData'
-      >, }
+      >, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, }
+export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = AxiosError<ErrorModel>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Me
  */
 
-export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, }
+export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TError = AxiosError<ErrorModel>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeMeGet>>, TError, TData>>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -126,30 +131,28 @@ export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TE
  * @summary Add Social Link
  */
 export const addSocialLinkMeSocialsPut = (
-    addOrUpdateSocialRequest: AddOrUpdateSocialRequest,
- ) => {
-      
-      
-      return customAxios<CandidateSocialLinkDTO>(
-      {url: `/me/socials`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: addOrUpdateSocialRequest
-    },
-      );
-    }
-  
+    addOrUpdateSocialRequest: AddOrUpdateSocialRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CandidateSocialLinkDTO>> => {
+    
+    
+    return axios.default.put(
+      `/me/socials`,
+      addOrUpdateSocialRequest,options
+    );
+  }
 
 
-export const getAddSocialLinkMeSocialsPutMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, TError,{data: AddOrUpdateSocialRequest}, TContext>, }
+
+export const getAddSocialLinkMeSocialsPutMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, TError,{data: AddOrUpdateSocialRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, TError,{data: AddOrUpdateSocialRequest}, TContext> => {
 
 const mutationKey = ['addSocialLinkMeSocialsPut'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -157,7 +160,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, {data: AddOrUpdateSocialRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  addSocialLinkMeSocialsPut(data,)
+          return  addSocialLinkMeSocialsPut(data,axiosOptions)
         }
 
         
@@ -167,13 +170,13 @@ const {mutation: mutationOptions} = options ?
 
     export type AddSocialLinkMeSocialsPutMutationResult = NonNullable<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>>
     export type AddSocialLinkMeSocialsPutMutationBody = AddOrUpdateSocialRequest
-    export type AddSocialLinkMeSocialsPutMutationError = HTTPValidationError
+    export type AddSocialLinkMeSocialsPutMutationError = AxiosError<ErrorModel | HTTPValidationError>
 
     /**
  * @summary Add Social Link
  */
-export const useAddSocialLinkMeSocialsPut = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, TError,{data: AddOrUpdateSocialRequest}, TContext>, }
+export const useAddSocialLinkMeSocialsPut = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>, TError,{data: AddOrUpdateSocialRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof addSocialLinkMeSocialsPut>>,
         TError,
@@ -189,28 +192,27 @@ export const useAddSocialLinkMeSocialsPut = <TError = HTTPValidationError,
  * @summary Remove Social Link
  */
 export const removeSocialLinkMeSocialsSocialIdDelete = (
-    socialId: number,
- ) => {
-      
-      
-      return customAxios<unknown>(
-      {url: `/me/socials/${socialId}`, method: 'DELETE'
-    },
-      );
-    }
-  
+    socialId: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    
+    
+    return axios.default.delete(
+      `/me/socials/${socialId}`,options
+    );
+  }
 
 
-export const getRemoveSocialLinkMeSocialsSocialIdDeleteMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, TError,{socialId: number}, TContext>, }
+
+export const getRemoveSocialLinkMeSocialsSocialIdDeleteMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, TError,{socialId: number}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, TError,{socialId: number}, TContext> => {
 
 const mutationKey = ['removeSocialLinkMeSocialsSocialIdDelete'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -218,7 +220,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, {socialId: number}> = (props) => {
           const {socialId} = props ?? {};
 
-          return  removeSocialLinkMeSocialsSocialIdDelete(socialId,)
+          return  removeSocialLinkMeSocialsSocialIdDelete(socialId,axiosOptions)
         }
 
         
@@ -228,13 +230,13 @@ const {mutation: mutationOptions} = options ?
 
     export type RemoveSocialLinkMeSocialsSocialIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>>
     
-    export type RemoveSocialLinkMeSocialsSocialIdDeleteMutationError = HTTPValidationError
+    export type RemoveSocialLinkMeSocialsSocialIdDeleteMutationError = AxiosError<ErrorModel | HTTPValidationError>
 
     /**
  * @summary Remove Social Link
  */
-export const useRemoveSocialLinkMeSocialsSocialIdDelete = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, TError,{socialId: number}, TContext>, }
+export const useRemoveSocialLinkMeSocialsSocialIdDelete = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>, TError,{socialId: number}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeSocialLinkMeSocialsSocialIdDelete>>,
         TError,

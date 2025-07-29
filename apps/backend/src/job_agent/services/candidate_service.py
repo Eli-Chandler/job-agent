@@ -59,7 +59,7 @@ class CandidateService:
         candidate = await self._get_candidate_by_email(request.email)
 
         if candidate is None:
-            raise CandidateNotFoundException(candidate_email=str(request.email))
+            raise WrongCredentialsException()
 
         if not _verify_password(request.password, candidate.hashed_password):
             raise WrongCredentialsException()

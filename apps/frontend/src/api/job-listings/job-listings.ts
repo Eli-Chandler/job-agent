@@ -14,13 +14,20 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
+import * as axios from 'axios';
 import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
+import type {
+  ErrorModel,
   HTTPValidationError,
   JobListingDTO,
   ScrapeJobListingRequest
 } from '.././models';
 
-import { customAxios } from '.././custom-axios';
 
 
 
@@ -29,31 +36,28 @@ import { customAxios } from '.././custom-axios';
  * @summary Scrape Job
  */
 export const scrapeJobJobListingsFromUrlPost = (
-    scrapeJobListingRequest: ScrapeJobListingRequest,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<JobListingDTO>(
-      {url: `/job-listings/from-url`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: scrapeJobListingRequest, signal
-    },
-      );
-    }
-  
+    scrapeJobListingRequest: ScrapeJobListingRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<JobListingDTO>> => {
+    
+    
+    return axios.default.post(
+      `/job-listings/from-url`,
+      scrapeJobListingRequest,options
+    );
+  }
 
 
-export const getScrapeJobJobListingsFromUrlPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, TError,{data: ScrapeJobListingRequest}, TContext>, }
+
+export const getScrapeJobJobListingsFromUrlPostMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, TError,{data: ScrapeJobListingRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, TError,{data: ScrapeJobListingRequest}, TContext> => {
 
 const mutationKey = ['scrapeJobJobListingsFromUrlPost'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -61,7 +65,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, {data: ScrapeJobListingRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  scrapeJobJobListingsFromUrlPost(data,)
+          return  scrapeJobJobListingsFromUrlPost(data,axiosOptions)
         }
 
         
@@ -71,13 +75,13 @@ const {mutation: mutationOptions} = options ?
 
     export type ScrapeJobJobListingsFromUrlPostMutationResult = NonNullable<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>>
     export type ScrapeJobJobListingsFromUrlPostMutationBody = ScrapeJobListingRequest
-    export type ScrapeJobJobListingsFromUrlPostMutationError = HTTPValidationError
+    export type ScrapeJobJobListingsFromUrlPostMutationError = AxiosError<ErrorModel | HTTPValidationError>
 
     /**
  * @summary Scrape Job
  */
-export const useScrapeJobJobListingsFromUrlPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, TError,{data: ScrapeJobListingRequest}, TContext>, }
+export const useScrapeJobJobListingsFromUrlPost = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>, TError,{data: ScrapeJobListingRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof scrapeJobJobListingsFromUrlPost>>,
         TError,

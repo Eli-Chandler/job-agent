@@ -13,11 +13,18 @@ class Settings(BaseSettings):
     database_uri: str
     secret_key: str
 
-    model_config = SettingsConfigDict(env_file=dotenv_path)
-
     s3_endpoint_url: str
     s3_access_key_id: str
     s3_secret_access_key: str
     s3_region_name: str
+    s3_bucket_name: str
+
+    frontend_origin: str
+
+    mock_delay: bool = False
+
+    model_config = SettingsConfigDict(env_file=dotenv_path)
+
+
 
 settings = Settings()

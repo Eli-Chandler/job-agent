@@ -14,13 +14,20 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
+import * as axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   CreateJobApplicationRequest,
+  ErrorModel,
   HTTPValidationError,
   JobApplicationDTO
 } from '.././models';
 
-import { customAxios } from '.././custom-axios';
 
 
 
@@ -29,31 +36,28 @@ import { customAxios } from '.././custom-axios';
  * @summary Apply Job
  */
 export const applyJobJobApplicationsPost = (
-    createJobApplicationRequest: CreateJobApplicationRequest,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<JobApplicationDTO>(
-      {url: `/job-applications/`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createJobApplicationRequest, signal
-    },
-      );
-    }
-  
+    createJobApplicationRequest: CreateJobApplicationRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<JobApplicationDTO>> => {
+    
+    
+    return axios.default.post(
+      `/job-applications/`,
+      createJobApplicationRequest,options
+    );
+  }
 
 
-export const getApplyJobJobApplicationsPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, TError,{data: CreateJobApplicationRequest}, TContext>, }
+
+export const getApplyJobJobApplicationsPostMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, TError,{data: CreateJobApplicationRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, TError,{data: CreateJobApplicationRequest}, TContext> => {
 
 const mutationKey = ['applyJobJobApplicationsPost'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -61,7 +65,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, {data: CreateJobApplicationRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  applyJobJobApplicationsPost(data,)
+          return  applyJobJobApplicationsPost(data,axiosOptions)
         }
 
         
@@ -71,13 +75,13 @@ const {mutation: mutationOptions} = options ?
 
     export type ApplyJobJobApplicationsPostMutationResult = NonNullable<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>>
     export type ApplyJobJobApplicationsPostMutationBody = CreateJobApplicationRequest
-    export type ApplyJobJobApplicationsPostMutationError = HTTPValidationError
+    export type ApplyJobJobApplicationsPostMutationError = AxiosError<ErrorModel | HTTPValidationError>
 
     /**
  * @summary Apply Job
  */
-export const useApplyJobJobApplicationsPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, TError,{data: CreateJobApplicationRequest}, TContext>, }
+export const useApplyJobJobApplicationsPost = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyJobJobApplicationsPost>>, TError,{data: CreateJobApplicationRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof applyJobJobApplicationsPost>>,
         TError,

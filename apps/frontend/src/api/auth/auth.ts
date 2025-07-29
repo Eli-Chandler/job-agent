@@ -14,14 +14,21 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
+import * as axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   BodyLoginAuthTokenPost,
   CandidateDTO,
   CreateCandidateRequest,
+  ErrorModel,
   HTTPValidationError
 } from '.././models';
 
-import { customAxios } from '.././custom-axios';
 
 
 
@@ -30,31 +37,28 @@ import { customAxios } from '.././custom-axios';
  * @summary Register
  */
 export const registerAuthRegisterPost = (
-    createCandidateRequest: CreateCandidateRequest,
- signal?: AbortSignal
-) => {
-      
-      
-      return customAxios<CandidateDTO>(
-      {url: `/auth/register`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createCandidateRequest, signal
-    },
-      );
-    }
-  
+    createCandidateRequest: CreateCandidateRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CandidateDTO>> => {
+    
+    
+    return axios.default.post(
+      `/auth/register`,
+      createCandidateRequest,options
+    );
+  }
 
 
-export const getRegisterAuthRegisterPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthRegisterPost>>, TError,{data: CreateCandidateRequest}, TContext>, }
+
+export const getRegisterAuthRegisterPostMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthRegisterPost>>, TError,{data: CreateCandidateRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof registerAuthRegisterPost>>, TError,{data: CreateCandidateRequest}, TContext> => {
 
 const mutationKey = ['registerAuthRegisterPost'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -62,7 +66,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerAuthRegisterPost>>, {data: CreateCandidateRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  registerAuthRegisterPost(data,)
+          return  registerAuthRegisterPost(data,axiosOptions)
         }
 
         
@@ -72,13 +76,13 @@ const {mutation: mutationOptions} = options ?
 
     export type RegisterAuthRegisterPostMutationResult = NonNullable<Awaited<ReturnType<typeof registerAuthRegisterPost>>>
     export type RegisterAuthRegisterPostMutationBody = CreateCandidateRequest
-    export type RegisterAuthRegisterPostMutationError = HTTPValidationError
+    export type RegisterAuthRegisterPostMutationError = AxiosError<ErrorModel | HTTPValidationError>
 
     /**
  * @summary Register
  */
-export const useRegisterAuthRegisterPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthRegisterPost>>, TError,{data: CreateCandidateRequest}, TContext>, }
+export const useRegisterAuthRegisterPost = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthRegisterPost>>, TError,{data: CreateCandidateRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof registerAuthRegisterPost>>,
         TError,
@@ -94,11 +98,10 @@ export const useRegisterAuthRegisterPost = <TError = HTTPValidationError,
  * @summary Login
  */
 export const loginAuthTokenPost = (
-    bodyLoginAuthTokenPost: BodyLoginAuthTokenPost,
- signal?: AbortSignal
-) => {
-      
-      const formUrlEncoded = new URLSearchParams();
+    bodyLoginAuthTokenPost: BodyLoginAuthTokenPost, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    
+    const formUrlEncoded = new URLSearchParams();
 if(bodyLoginAuthTokenPost.grant_type !== undefined && bodyLoginAuthTokenPost.grant_type !== null) {
  formUrlEncoded.append(`grant_type`, bodyLoginAuthTokenPost.grant_type)
  }
@@ -114,26 +117,24 @@ if(bodyLoginAuthTokenPost.client_secret !== undefined && bodyLoginAuthTokenPost.
  formUrlEncoded.append(`client_secret`, bodyLoginAuthTokenPost.client_secret)
  }
 
-      return customAxios<unknown>(
-      {url: `/auth/token`, method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded', },
-       data: formUrlEncoded, signal
-    },
-      );
-    }
-  
+    return axios.default.post(
+      `/auth/token`,
+      formUrlEncoded,options
+    );
+  }
 
 
-export const getLoginAuthTokenPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthTokenPost>>, TError,{data: BodyLoginAuthTokenPost}, TContext>, }
+
+export const getLoginAuthTokenPostMutationOptions = <TError = AxiosError<void | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthTokenPost>>, TError,{data: BodyLoginAuthTokenPost}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof loginAuthTokenPost>>, TError,{data: BodyLoginAuthTokenPost}, TContext> => {
 
 const mutationKey = ['loginAuthTokenPost'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, axios: undefined};
 
       
 
@@ -141,7 +142,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginAuthTokenPost>>, {data: BodyLoginAuthTokenPost}> = (props) => {
           const {data} = props ?? {};
 
-          return  loginAuthTokenPost(data,)
+          return  loginAuthTokenPost(data,axiosOptions)
         }
 
         
@@ -151,13 +152,13 @@ const {mutation: mutationOptions} = options ?
 
     export type LoginAuthTokenPostMutationResult = NonNullable<Awaited<ReturnType<typeof loginAuthTokenPost>>>
     export type LoginAuthTokenPostMutationBody = BodyLoginAuthTokenPost
-    export type LoginAuthTokenPostMutationError = HTTPValidationError
+    export type LoginAuthTokenPostMutationError = AxiosError<void | HTTPValidationError>
 
     /**
  * @summary Login
  */
-export const useLoginAuthTokenPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthTokenPost>>, TError,{data: BodyLoginAuthTokenPost}, TContext>, }
+export const useLoginAuthTokenPost = <TError = AxiosError<void | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthTokenPost>>, TError,{data: BodyLoginAuthTokenPost}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof loginAuthTokenPost>>,
         TError,

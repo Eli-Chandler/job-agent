@@ -1,10 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
-from api.routers.auth_router import auth_router
-from api.routers.candidate_router import candidate_router
-from api.routers.me_router import me_router
-from api.routers.job_listing_router import job_listing_router
+import asyncio
 
+from api.config import settings
 from api.routers import (
     auth_router,
     candidate_router,
@@ -15,6 +15,23 @@ from api.routers import (
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class DelayMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        await asyncio.sleep(0.2)  # 200ms delay
+        return await call_next(request)
+
+if settings.mock_delay:
+    app.add_middleware(DelayMiddleware)
+
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(candidate_router, prefix="/candidates", tags=["candidate"])
 app.include_router(me_router, prefix="/me", tags=["me"])
@@ -22,7 +39,6 @@ app.include_router(job_listing_router, prefix="/job-listings", tags=["job-listin
 app.include_router(
     job_application_router, prefix="/job-applications", tags=["job-applications"]
 )
-
 
 @app.get("/health")
 def health_check():

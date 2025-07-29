@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from api.auth import get_current_user_id
+from api.routers.utils import ErrorModel
 from job_agent.services.candidate_service import (
     CandidateService,
 )
@@ -10,7 +11,13 @@ from api.dependencies import get_candidate_service
 me_router = APIRouter()
 
 
-@me_router.get("/", response_model=CandidateDTO)
+@me_router.get(
+    "/",
+    response_model=CandidateDTO,
+    responses={
+        404: {"model": ErrorModel}
+    }
+)
 async def get_me(
     current_user_id: int = Depends(get_current_user_id),
     service: CandidateService = Depends(get_candidate_service),
@@ -18,7 +25,13 @@ async def get_me(
     return await service.get_candidate_by_id(current_user_id)
 
 
-@me_router.put("/socials", response_model=CandidateSocialLinkDTO)
+@me_router.put(
+    "/socials",
+    response_model=CandidateSocialLinkDTO,
+    responses={
+        404: {"model": ErrorModel}
+    }
+)
 async def add_social_link(
     request: AddOrUpdateSocialRequest,
     current_user_id: int = Depends(get_current_user_id),
@@ -27,7 +40,12 @@ async def add_social_link(
     return await service.add_or_update_social_link(current_user_id, request)
 
 
-@me_router.delete("/socials/{social_id}")
+@me_router.delete(
+    "/socials/{social_id}",
+    responses={
+        404: {"model": ErrorModel}
+    }
+)
 async def remove_social_link(
     social_id: int,
     current_user_id: int = Depends(get_current_user_id),

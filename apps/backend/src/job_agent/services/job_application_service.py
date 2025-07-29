@@ -75,6 +75,8 @@ class JobApplicationService:
     async def create_job_application(
         self, candidate_id: int, request: CreateJobApplicationRequest
     ) -> JobApplicationDTO:
+        # TODO: Check for existing job application for this job
+
         candidate = await self._get_candidate_by_id(candidate_id)
         job_listing = await self._get_job_listing_by_id(request.job_listing_id)
         resume = (
