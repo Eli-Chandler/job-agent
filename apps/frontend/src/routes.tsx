@@ -1,10 +1,12 @@
 import {
-    createBrowserRouter
+    createBrowserRouter, Navigate, Outlet
 } from "react-router";
 import Layout from "@/Layout";
 import App from "@/App.tsx";
 import HomePage from "@/pages/HomePage.tsx";
 import LoginPage from "@/pages/LoginPage.tsx";
+import {useUser} from "@/hooks/use-user.tsx";
+import DashboardPage from "@/pages/DashboardPage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -20,37 +22,28 @@ export const router = createBrowserRouter([
                     {
                         path: "/login",
                         element: <LoginPage/>
+                    },
+                    {
+                        element: <ProtectedRoute/>,
+                        children: [
+                            {
+                                path: "/dashboard",
+                                element: <DashboardPage/>
+                            }
+                        ]
                     }
+
                 ]
-                //     {
-                //         path: "/login",
-                //         element: <LoginPage/>
-                //     },
-                //     {
-                //         element: <ProtectedRoute/>,
-                //         children: [
-                //             {
-                //                 path: "/dashboard",
-                //                 element: <DashboardPage/>
-                //             },
-                //             {
-                //                 path: "/dashboard/assistant/:assistantId",
-                //                 element: <AssistantDashboardPage/>
-                //             }
-                //         ]
-                //     }
-                //
-                // ]
             }
         ]
     },
 ]);
 
-// function ProtectedRoute() {
-//     const {user, isLoading} = useUser()
-//     if (isLoading) return null;
-//     if (!user) {
-//         return <Navigate to="/login" replace/>;
-//     }
-//     return <Outlet/>;
-// }
+function ProtectedRoute() {
+    const {user, isLoading} = useUser()
+    if (isLoading) return null;
+    if (!user) {
+        return <Navigate to="/login" replace/>;
+    }
+    return <Outlet/>;
+}

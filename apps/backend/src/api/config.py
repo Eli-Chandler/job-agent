@@ -21,9 +21,14 @@ class Settings(BaseSettings):
 
     frontend_origin: str
 
+    cookie_secure: bool
+    cookie_domain: str | None = None
+
     mock_delay: bool = False
 
     model_config = SettingsConfigDict(env_file=dotenv_path)
+
+    environment: str = ENV
 
 
 

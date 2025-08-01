@@ -2,9 +2,10 @@ import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Database, LogIn} from 'lucide-react';
 import {Link} from "react-router";
+import {useUser} from "@/hooks/use-user.tsx";
 
 export default function HomePage() {
-    const user = undefined;
+    const user = useUser();
 
     return (
         <div className="max-w-4xl mx-auto">

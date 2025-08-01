@@ -1,6 +1,6 @@
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
 import {JobAgentLogo} from "@/components/ui/job-agent-logo.tsx";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Label} from "@/components/ui/label.tsx";
@@ -8,6 +8,7 @@ import {IconInput} from "@/components/ui/icon-input.tsx";
 import {LockIcon, MailIcon, PhoneIcon, UserIcon} from "lucide-react";
 import {useState} from "react";
 import {useLoginAuthTokenPost, useRegisterAuthRegisterPost} from "@/api/auth/auth.ts";
+import {useUser} from "@/hooks/use-user.tsx";
 
 export default function LoginPage() {
     return (
@@ -54,15 +55,21 @@ function SignupTab() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const {refreshUser} = useUser();
+    const navigate = useNavigate()
+
     const mutation = useRegisterAuthRegisterPost({
-      mutation: {
-        onSuccess: (data) => { console.log("Registration successful", data); },
-        onError: (error) => {
-            console.error(error.response?.data.detail)
-            setErrorMessage(error.response?.data.detail?.toString() || "Unknown error")
-            console.log(errorMessage)
+        mutation: {
+            onSuccess: async () => {
+                await refreshUser();
+                navigate("/dashboard")
+            },
+            onError: (error) => {
+                console.error(error.response?.data.detail);
+                setErrorMessage(error.response?.data.detail?.toString() || "Unknown error");
+                console.log(errorMessage);
+            }
         }
-      }
     });
 
     const isFormValid = firstName && lastName && email && phone && password && confirmPassword && password === confirmPassword;
@@ -165,7 +172,9 @@ function SignupTab() {
 
             </div>
 
-            <Button onClick={handleSubmit} disabled={!isFormValid || mutation.isPending}>Sign Up</Button>
+            <Button onClick={handleSubmit}
+                    disabled={!isFormValid || mutation.isPending}>{mutation.isPending ? "Signing Up..." : "Sign Up"}
+            </Button>
             {
                 errorMessage && <p className="text-destructive">{errorMessage}</p>
             }
@@ -176,15 +185,21 @@ function SignupTab() {
 function LoginTab() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const {refreshUser} = useUser();
+    const navigate = useNavigate();
+
+    const isFormValid = email && password
+
     const mutation = useLoginAuthTokenPost({
-      mutation: {
-        onSuccess: (data) => { console.log(data) },
-        onError: (error) => {
-            console.error(error.response?.data.detail)
-            setErrorMessage(error.response?.data.detail?.toString() || "Unknown error")
-            console.log(errorMessage)
+        mutation: {
+            onSuccess: async () => {
+                await refreshUser();
+                navigate("/dashboard")
+            },
+            onError: (error) => {
+                console.log(error)
+            }
         }
-      }
     });
 
     function handleClick() {
@@ -221,7 +236,9 @@ function LoginTab() {
                     placeholder="Your password"
                 />
             </div>
-            <Button onClick={handleClick}>Log In</Button>
+            <Button onClick={handleClick} disabled={!isFormValid || mutation.isPending}>
+                {mutation.isPending ? "Logging In..." : "Log In"}
+            </Button>
         </div>
     );
 }

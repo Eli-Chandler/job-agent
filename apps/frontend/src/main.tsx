@@ -6,8 +6,9 @@ import {router} from "@/routes.tsx"
 
 import axios from 'axios';
 
-// Set the base URL from your .env.development (or other env files)
+// Set the base URL from .env.development
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+axios.defaults.withCredentials = true;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
