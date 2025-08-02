@@ -13,22 +13,18 @@ import {
   LoaderIcon
 } from 'lucide-react';
 import type { CandidateSocialLinkDTO, AddOrUpdateSocialRequest } from '@/api/models';
-import {
-    useAddSocialLinkMeSocialsPut,
-    useGetMeSocialsMeSocialsGet,
-    useRemoveSocialLinkMeSocialsSocialIdDelete
-} from "@/api/me/me.ts";
 import {useState} from "react";
 import {Link} from "react-router";
+import {useDeleteSocialLink, useGetSocialLinks, useUpdateSocialLink} from "@/api/me/me.ts";
 
 export default function SocialLinks() {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
 
   // API hooks
-  const { data, isLoading, refetch } = useGetMeSocialsMeSocialsGet();
-  const addSocialMutation = useAddSocialLinkMeSocialsPut();
-  const deleteSocialMutation = useRemoveSocialLinkMeSocialsSocialIdDelete();
+  const { data, isLoading, refetch } = useGetSocialLinks();
+  const addSocialMutation = useUpdateSocialLink();
+  const deleteSocialMutation = useDeleteSocialLink();
 
   const socials = data?.data || []
 

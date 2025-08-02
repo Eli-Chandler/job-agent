@@ -5,8 +5,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ResumeDTO {
-  id: number;
+export interface BodyUploadResume {
   name: string;
-  created_at: string;
+  file: Blob;
 }

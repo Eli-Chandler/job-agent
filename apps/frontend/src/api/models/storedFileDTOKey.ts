@@ -5,8 +5,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ResumeDTO {
-  id: number;
-  name: string;
-  created_at: string;
-}
+export type StoredFileDTOKey = string | null;

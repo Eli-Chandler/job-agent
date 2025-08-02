@@ -13,7 +13,7 @@ import {useUser} from "@/hooks/use-user.tsx";
 export default function LoginPage() {
     return (
         <div className="flex justify-center">
-            <Card>
+            <Card className="w-full max-w-xl">
                 <CardHeader>
                     <JobAgentLogo className="mx-auto mb-4"/>
                     <CardTitle>
@@ -25,7 +25,7 @@ export default function LoginPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs defaultValue="signup" className="w-[400px]">
+                    <Tabs defaultValue="signup">
                         <TabsList>
                             <TabsTrigger value="signup">Sign Up</TabsTrigger>
                             <TabsTrigger value="login">Log In</TabsTrigger>
@@ -88,7 +88,7 @@ function SignupTab() {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="first-name">First Name</Label>
                     <IconInput

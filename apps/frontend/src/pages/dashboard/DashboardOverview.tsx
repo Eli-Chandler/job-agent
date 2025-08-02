@@ -1,6 +1,6 @@
 import {DashboardHeader, StatCard} from "@/ui/dashboard.tsx";
 import {BriefcaseIcon, CalendarIcon, CheckIcon, ClockIcon, XIcon} from "lucide-react";
-import {RecentActivity} from "@/components/dashboard/dashboard.tsx";
+import {RecentActivity} from "@/components/dashboard/recent-activity.tsx";
 
 export default function DashboardOverview() {
     const stats = {

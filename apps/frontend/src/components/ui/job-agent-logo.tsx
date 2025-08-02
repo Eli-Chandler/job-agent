@@ -8,7 +8,7 @@ interface LeveliLogoProps {
 export function JobAgentLogo({ className }: LeveliLogoProps) {
     return (
         <div className={cn("flex items-center gap-2", className)}>
-            <BriefcaseIcon className="w-6 h-6" />
+            <BriefcaseIcon className="w-6 h-6 text-primary" />
             <span className="text-2xl font-semibold">JobAgent</span>
         </div>
     );

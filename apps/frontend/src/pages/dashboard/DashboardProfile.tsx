@@ -1,6 +1,7 @@
 import {DashboardHeader} from "@/ui/dashboard.tsx";
 import PersonalInformation from "@/components/dashboard/personal-information.tsx";
 import SocialLinks from "@/components/dashboard/social-links.tsx";
+import ResumeManagement from "@/components/dashboard/resume-management.tsx";
 
 
 export default function DashboardProfile() {
@@ -9,6 +10,7 @@ export default function DashboardProfile() {
             <DashboardHeader title={"Candidate Profile"}/>
             <PersonalInformation/>
             <SocialLinks/>
+            <ResumeManagement/>
         </div>
 
     )

@@ -1,6 +1,6 @@
 import {Outlet} from "react-router";
 
-import {DashboardSidebar} from "@/components/dashboard/dashboard-sidebar.tsx";
+import {DashboardNavigation} from "@/components/dashboard/dashboard-sidebar.tsx";
 import {BriefcaseIcon, HomeIcon, MailIcon, UserIcon} from "lucide-react";
 
 export default function DashboardPage() {
@@ -30,8 +30,10 @@ export default function DashboardPage() {
 
     return (
         <div className="flex gap-4">
-            <DashboardSidebar items={sideBarItems}/>
-            <Outlet/>
+            <DashboardNavigation items={sideBarItems}/>
+            <main className="flex-1">
+                <Outlet/>
+            </main>
         </div>
     );
 }

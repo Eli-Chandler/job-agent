@@ -79,6 +79,21 @@ class ResumeService:
 
         return await self._s3_file_uploader.generate_presigned_url(resume.stored_file)
 
+    async def delete_resume(self, candidate_id: int, resume_id: int) -> None:
+        result = await self._db.execute(
+            select(Resume)
+            .where(Resume.candidate_id == candidate_id)
+            .where(Resume.id == resume_id)
+            .options(selectinload(Resume.stored_file))
+        )
+        resume: Resume | None = result.scalar_one_or_none()
+
+        if resume is None:
+            raise ResumeNotFoundException(resume_id)
+
+        await self._db.delete(resume)
+        await self._db.commit()
+
 
 async def _extract_text_content_from_pdf(pdf: bytes):
     def read() -> str:

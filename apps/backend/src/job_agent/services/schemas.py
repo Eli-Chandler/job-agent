@@ -73,13 +73,11 @@ class CandidateSocialLinkDTO(BaseModel):
 class ResumeDTO(BaseModel):
     id: int
     name: str
+    created_at: datetime
 
     @classmethod
     def from_model(cls, model: Resume) -> "ResumeDTO":
-        return cls(
-            id=model.id,
-            name=model.name,
-        )
+        return cls(id=model.id, name=model.name, created_at=model.created_at)
 
 
 class CoverLetterDTO(BaseModel):

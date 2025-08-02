@@ -14,13 +14,13 @@ import {
 import type {LucideIcon} from 'lucide-react';
 
 import type {UpdateCandidatePersonalInfoRequest} from '@/api/models';
-import {useGetMeMeGet, useUpdateMeInfoMePatch} from "@/api/me/me.ts";
+import {useGetCurrentlyAuthenticatedUser, useUpdateCurrentlyAuthenticatedUser} from "@/api/me/me.ts";
 import {useEffect, useState} from "react";
 
 export default function PersonalInformation() {
     // API hooks
-    const {data: user, isLoading, refetch} = useGetMeMeGet();
-    const updateMutation = useUpdateMeInfoMePatch();
+    const {data: user, isLoading, refetch} = useGetCurrentlyAuthenticatedUser();
+    const updateMutation = useUpdateCurrentlyAuthenticatedUser();
 
     // Form state
     const [isEditing, setIsEditing] = useState(false);

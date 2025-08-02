@@ -1,5 +1,5 @@
 import type {CandidateDTO} from "@/api/models";
-import {useGetMeMeGet} from "@/api/me/me.ts";
+import {useGetCurrentlyAuthenticatedUser} from "@/api/me/me.ts";
 
 export function useUser(): {
     user?: CandidateDTO;
@@ -7,7 +7,7 @@ export function useUser(): {
     error?: string;
     refreshUser: () => Promise<void>;
 } {
-    const {data, isLoading, error, refetch} = useGetMeMeGet();
+    const {data, isLoading, error, refetch} = useGetCurrentlyAuthenticatedUser();
 
     return {
         user: data?.data,

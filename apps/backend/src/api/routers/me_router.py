@@ -127,6 +127,20 @@ async def upload_resume(
     )
 
 
+@me_router.delete(
+    "/resumes/{resume_id}",
+    responses={404: {"model": ErrorModel}},
+    operation_id="deleteResume",
+)
+async def delete_resume(
+    resume_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    service: ResumeService = Depends(get_resume_service),
+):
+    await service.delete_resume(current_user_id, resume_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @me_router.get(
     "/resumes/{resume_id}/presigned-url",
     response_model=PresignedUrlDTO,
