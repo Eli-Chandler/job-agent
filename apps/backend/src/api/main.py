@@ -29,6 +29,7 @@ class DelayMiddleware(BaseHTTPMiddleware):
         await asyncio.sleep(0.2)  # 200ms delay
         return await call_next(request)
 
+
 if settings.mock_delay:
     app.add_middleware(DelayMiddleware)
 
@@ -40,8 +41,7 @@ app.include_router(
     job_application_router, prefix="/job-applications", tags=["job-applications"]
 )
 
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-

@@ -1,8 +1,8 @@
-"""init
+"""Init
 
-Revision ID: a5ad7ad7b8f7
+Revision ID: bd0006e98069
 Revises:
-Create Date: 2025-07-26 16:23:03.805235
+Create Date: 2025-08-02 17:34:46.159267
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a5ad7ad7b8f7"
+revision: str = "bd0006e98069"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -49,11 +49,21 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
+        "stored_file",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("key", sa.String(length=255), nullable=False),
+        sa.Column("bucket", sa.String(length=100), nullable=False),
+        sa.Column("content_type", sa.String(length=100), nullable=True),
+        sa.Column("uploaded_at", sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("key"),
+    )
+    op.create_table(
         "candidate_social_link",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(length=50), nullable=False),
         sa.Column("_link", sa.String(length=100), nullable=False),
-        sa.Column("candidate_id", sa.Integer(), nullable=True),
+        sa.Column("candidate_id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -67,7 +77,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("_name", sa.String(length=50), nullable=True),
         sa.Column("key", sa.String(length=100), nullable=False),
-        sa.Column("candidate_id", sa.Integer(), nullable=True),
+        sa.Column("candidate_id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -79,14 +89,19 @@ def upgrade() -> None:
     op.create_table(
         "resume",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("_name", sa.String(length=50), nullable=True),
-        sa.Column("key", sa.String(length=100), nullable=False),
-        sa.Column("candidate_id", sa.Integer(), nullable=True),
+        sa.Column("_name", sa.String(length=50), nullable=False),
+        sa.Column("text_content", sa.Text(), nullable=False),
+        sa.Column("stored_file_id", sa.Integer(), nullable=False),
+        sa.Column("candidate_id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ["candidate_id"],
             ["candidate.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["stored_file_id"],
+            ["stored_file.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -107,7 +122,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("notes", sa.Text(), nullable=True),
-        sa.Column("candidate_id", sa.Integer(), nullable=True),
+        sa.Column("candidate_id", sa.Integer(), nullable=False),
         sa.Column("job_listing_id", sa.Integer(), nullable=True),
         sa.Column("used_resume_id", sa.Integer(), nullable=True),
         sa.Column("used_cover_letter_id", sa.Integer(), nullable=True),
@@ -139,6 +154,7 @@ def downgrade() -> None:
     op.drop_table("resume")
     op.drop_table("cover_letter")
     op.drop_table("candidate_social_link")
+    op.drop_table("stored_file")
     op.drop_table("job_listing")
     op.drop_index(op.f("ix_candidate_email"), table_name="candidate")
     op.drop_table("candidate")

@@ -1,6 +1,7 @@
 import pytest
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
 
+
 @pytest.mark.asyncio
 async def test_hiring_cafe_job_scraper():
     # Arrange

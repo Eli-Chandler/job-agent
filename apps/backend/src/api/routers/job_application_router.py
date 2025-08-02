@@ -18,7 +18,7 @@ job_application_router = APIRouter()
     responses={
         404: {"model": ErrorModel},
         409: {"model": ErrorModel},
-    }
+    },
 )
 async def apply_job(
     request: CreateJobApplicationRequest,

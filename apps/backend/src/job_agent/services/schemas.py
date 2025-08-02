@@ -4,7 +4,15 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, HttpUrl, Field
 
-from job_agent.models import Candidate, CandidateSocialLink, Resume, CoverLetter, JobApplication, JobListing
+from job_agent.models import (
+    Candidate,
+    CandidateSocialLink,
+    Resume,
+    CoverLetter,
+    JobApplication,
+    JobListing,
+    StoredFile,
+)
 
 
 class CreateCandidateRequest(BaseModel):
@@ -155,7 +163,29 @@ class UploadResumeRequest(BaseModel):
     name: str
     file: FileContent
 
+
 class UpdateCandidatePersonalInfoRequest(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1)
     last_name: Optional[str] = Field(None, min_length=1)
     phone: Optional[str] = Field(None, min_length=1)
+
+
+class StoredFileDTO(BaseModel):
+    id: int
+    uploaded_at: datetime
+    content_type: Optional[str]
+    key: Optional[str]
+
+    @classmethod
+    def from_model(cls, file: StoredFile) -> "StoredFileDTO":
+        return cls(
+            id=file.id,
+            uploaded_at=file.uploaded_at,
+            content_type=file.content_type,
+            key=file.key,
+        )
+
+
+class PresignedUrlDTO(BaseModel):
+    file: StoredFileDTO
+    presigned_url: str

@@ -13,7 +13,11 @@ from api.routers.utils import ErrorModel
 from job_agent.services.candidate_service import (
     CandidateService,
 )
-from job_agent.services.schemas import CreateCandidateRequest, CandidateLoginRequest, CandidateDTO
+from job_agent.services.schemas import (
+    CreateCandidateRequest,
+    CandidateLoginRequest,
+    CandidateDTO,
+)
 from api.dependencies import get_candidate_service
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -22,12 +26,13 @@ auth_router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
+
 @auth_router.post(
     "/register",
     response_model=CandidateDTO,
     responses={
         409: {"model": ErrorModel},
-    }
+    },
 )
 async def register(
     response: Response,
@@ -49,18 +54,12 @@ async def register(
         domain=settings.cookie_domain,
         samesite="strict",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/"
+        path="/",
     )
     return user
 
 
-
-@auth_router.post(
-    "/token",
-    responses={
-        401: {}
-    }
-)
+@auth_router.post("/token", responses={401: {}})
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     response: Response,
@@ -77,7 +76,7 @@ async def login(
         {
             "sub": str(result.id),
         },
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
     response.set_cookie(
@@ -88,7 +87,7 @@ async def login(
         domain=settings.cookie_domain,
         samesite="strict",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/"
+        path="/",
     )
 
     return {"access_token": access_token, "token_type": "bearer"}

@@ -20,6 +20,7 @@ dependencies = [
     "pydantic[email]>=2.5.3",
     "pypdf2>=3.0.1",
     "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.20",
     "sqlalchemy[asyncio]>=2.0.41",
 ]
 

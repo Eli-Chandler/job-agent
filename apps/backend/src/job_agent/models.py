@@ -123,7 +123,9 @@ class Resume(Base):
     _name: Mapped[str] = mapped_column(String(50), nullable=False)
     text_content: Mapped[str] = mapped_column(Text, nullable=False)
 
-    stored_file_id: Mapped[int] = mapped_column(ForeignKey("stored_file.id"), nullable=False)
+    stored_file_id: Mapped[int] = mapped_column(
+        ForeignKey("stored_file.id"), nullable=False
+    )
     stored_file: Mapped[StoredFile] = relationship()
 
     candidate_id: Mapped[Optional[int]] = mapped_column(
@@ -142,14 +144,19 @@ class Resume(Base):
         default=datetime.utcnow, nullable=False
     )
 
-    def __init__(self, name: str, stored_file: "StoredFile", text_content: str, candidate: Candidate):
+    def __init__(
+        self,
+        name: str,
+        stored_file: "StoredFile",
+        text_content: str,
+        candidate: Candidate,
+    ):
         super().__init__()
 
         self._name = name
         self.text_content = text_content
         self.candidate = candidate
         self.stored_file = stored_file
-
 
     def _update(self):
         self.updated_at = datetime.utcnow()
@@ -328,7 +335,9 @@ class StoredFile(Base):
     key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     bucket: Mapped[str] = mapped_column(String(100), nullable=False)
     content_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    uploaded_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, nullable=False
+    )
 
     def __init__(self, key: str, bucket: str, content_type: Optional[str] = None):
         super().__init__()

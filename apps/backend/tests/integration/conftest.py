@@ -35,6 +35,7 @@ MINIO_SECRET_KEY = "minioadmin"
 MINIO_BUCKET = "test-bucket"
 MINIO_ENDPOINT_URL = f"http://localhost:{MINIO_PORT}"
 
+
 def ensure_minio_container():
     client = docker.from_env()
 
@@ -66,12 +67,14 @@ def ensure_minio_container():
     for i in range(max_retries):
         try:
             with socket.create_connection(("localhost", MINIO_PORT), timeout=2):
-                print(f"MinIO is ready after {i+1} attempts")
+                print(f"MinIO is ready after {i + 1} attempts")
                 break
         except (OSError, ConnectionRefusedError):
             time.sleep(1)
     else:
-        raise RuntimeError(f"MinIO never came up on port {MINIO_PORT} after {max_retries} seconds")
+        raise RuntimeError(
+            f"MinIO never came up on port {MINIO_PORT} after {max_retries} seconds"
+        )
 
     # Additional wait to ensure MinIO API is fully ready
     time.sleep(2)
@@ -84,10 +87,12 @@ def ensure_minio_container():
         "bucket_name": MINIO_BUCKET,
     }
 
+
 @pytest_asyncio.fixture(scope="session")
 async def s3_config():
     """Ensure MinIO container is running and return S3 connection config."""
     return ensure_minio_container()
+
 
 async def wait_for_minio_api(s3_config, max_retries=30):
     """Wait for MinIO API to be ready by attempting to list buckets."""
@@ -96,27 +101,28 @@ async def wait_for_minio_api(s3_config, max_retries=30):
     for i in range(max_retries):
         try:
             async with session.client(
-                    "s3",
-                    endpoint_url=s3_config["endpoint_url"],
-                    aws_access_key_id=s3_config["aws_access_key_id"],
-                    aws_secret_access_key=s3_config["aws_secret_access_key"],
-                    region_name=s3_config["region_name"],
-                    config=Config(
-                        s3={"addressing_style": "path"},
-                        retries={"max_attempts": 1},  # Don't retry within boto3
-                        connect_timeout=5,
-                        read_timeout=10
-                    ),
+                "s3",
+                endpoint_url=s3_config["endpoint_url"],
+                aws_access_key_id=s3_config["aws_access_key_id"],
+                aws_secret_access_key=s3_config["aws_secret_access_key"],
+                region_name=s3_config["region_name"],
+                config=Config(
+                    s3={"addressing_style": "path"},
+                    retries={"max_attempts": 1},  # Don't retry within boto3
+                    connect_timeout=5,
+                    read_timeout=10,
+                ),
             ) as client:
                 # Try a simple operation to verify API is ready
                 await client.list_buckets()
-                print(f"MinIO API is ready after {i+1} attempts")
+                print(f"MinIO API is ready after {i + 1} attempts")
                 return
         except Exception as e:
-            print(f"MinIO API not ready (attempt {i+1}/{max_retries}): {e}")
+            print(f"MinIO API not ready (attempt {i + 1}/{max_retries}): {e}")
             await asyncio.sleep(1)
 
     raise RuntimeError(f"MinIO API never became ready after {max_retries} attempts")
+
 
 @pytest_asyncio.fixture(scope="function")
 async def s3_client(s3_config) -> AsyncGenerator[S3Client, None]:
@@ -126,17 +132,17 @@ async def s3_client(s3_config) -> AsyncGenerator[S3Client, None]:
 
     session = aioboto3.Session()
     async with session.client(
-            "s3",
-            endpoint_url=s3_config["endpoint_url"],
-            aws_access_key_id=s3_config["aws_access_key_id"],
-            aws_secret_access_key=s3_config["aws_secret_access_key"],
-            region_name=s3_config["region_name"],
-            config=Config(
-                s3={"addressing_style": "path"},
-                retries={"max_attempts": 3},
-                connect_timeout=10,
-                read_timeout=30
-            ),
+        "s3",
+        endpoint_url=s3_config["endpoint_url"],
+        aws_access_key_id=s3_config["aws_access_key_id"],
+        aws_secret_access_key=s3_config["aws_secret_access_key"],
+        region_name=s3_config["region_name"],
+        config=Config(
+            s3={"addressing_style": "path"},
+            retries={"max_attempts": 3},
+            connect_timeout=10,
+            read_timeout=30,
+        ),
     ) as client:
         # Ensure the bucket exists
         try:
@@ -151,13 +157,14 @@ async def s3_client(s3_config) -> AsyncGenerator[S3Client, None]:
 
         yield client
 
+
 @pytest_asyncio.fixture(scope="function")
-async def s3_file_uploader(db_session: AsyncSession, s3_client: S3Client, s3_config) -> S3FileUploader:
+async def s3_file_uploader(
+    db_session: AsyncSession, s3_client: S3Client, s3_config
+) -> S3FileUploader:
     """Create S3FileUploader with cleanup."""
     uploader = S3FileUploader(
-        db=db_session,
-        s3_client=s3_client,
-        bucket_name=s3_config["bucket_name"]
+        db=db_session, s3_client=s3_client, bucket_name=s3_config["bucket_name"]
     )
 
     yield uploader
@@ -169,11 +176,12 @@ async def s3_file_uploader(db_session: AsyncSession, s3_client: S3Client, s3_con
         if contents:
             await s3_client.delete_objects(
                 Bucket=s3_config["bucket_name"],
-                Delete={"Objects": [{"Key": obj["Key"]} for obj in contents]}
+                Delete={"Objects": [{"Key": obj["Key"]} for obj in contents]},
             )
             print(f"Cleaned up {len(contents)} objects from bucket")
     except Exception as e:
         print(f"Warning: Could not clean up bucket: {e}")
+
 
 def ensure_pgvector_container():
     client = docker.from_env()
@@ -208,6 +216,7 @@ def ensure_pgvector_container():
 
     return f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}"
 
+
 @pytest_asyncio.fixture(scope="session")
 async def db_engine():
     """Session-scoped async SQLAlchemy engine."""
@@ -216,7 +225,7 @@ async def db_engine():
         async_url,
         echo=False,
         poolclass=NullPool,
-        pool_pre_ping=True  # Verify connections before use
+        pool_pre_ping=True,  # Verify connections before use
     )
 
     # Create schema once per session
@@ -231,12 +240,13 @@ async def db_engine():
         except Exception as e:
             if i == max_retries - 1:
                 raise
-            print(f"Database not ready (attempt {i+1}/{max_retries}): {e}")
+            print(f"Database not ready (attempt {i + 1}/{max_retries}): {e}")
             await asyncio.sleep(2)
 
     yield engine
 
     await engine.dispose()
+
 
 @pytest_asyncio.fixture(scope="function")
 async def db_connection(db_engine):
@@ -247,6 +257,7 @@ async def db_connection(db_engine):
             yield conn
         finally:
             await trans.rollback()
+
 
 @pytest_asyncio.fixture(scope="function")
 async def db_session(db_connection):

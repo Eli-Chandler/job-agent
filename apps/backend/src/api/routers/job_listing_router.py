@@ -13,11 +13,7 @@ job_listing_router = APIRouter()
 
 
 @job_listing_router.post(
-    "/from-url",
-    response_model=JobListingDTO,
-    responses={
-        404: {"model": ErrorModel}
-    }
+    "/from-url", response_model=JobListingDTO, responses={404: {"model": ErrorModel}}
 )
 async def scrape_job(
     request: ScrapeJobListingRequest,

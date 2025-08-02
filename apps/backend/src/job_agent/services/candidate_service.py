@@ -21,12 +21,22 @@ from job_agent.services.exceptions import (
     CandidateEmailConflictException,
     SocialLinkNotFoundException,
     ResumeNameConflictException,
+    InvalidResumeFileTypeException,
 )
 from job_agent.services.s3_file_uploader import S3FileUploader
-from job_agent.services.schemas import CreateCandidateRequest, CandidateLoginRequest, AddOrUpdateSocialRequest, \
-    CandidateDTO, CandidateSocialLinkDTO, UploadResumeRequest, ResumeDTO, UpdateCandidatePersonalInfoRequest
+from job_agent.services.schemas import (
+    CreateCandidateRequest,
+    CandidateLoginRequest,
+    AddOrUpdateSocialRequest,
+    CandidateDTO,
+    CandidateSocialLinkDTO,
+    UploadResumeRequest,
+    ResumeDTO,
+    UpdateCandidatePersonalInfoRequest,
+)
 
 from PyPDF2 import PdfReader
+
 
 class CandidateService:
     def __init__(self, db: AsyncSession, s3_file_uploader: S3FileUploader):
@@ -134,46 +144,9 @@ class CandidateService:
         await self._db.delete(social)
         await self._db.commit()
 
-    async def upload_resume(self, candidate_id: int, request: UploadResumeRequest) -> ResumeDTO:
-        query = (
-            select(Candidate)
-            .where(Candidate.id == candidate_id)
-            .options(selectinload(Candidate.resumes))
-        )
-        result = await self._db.execute(query)
-        candidate: Candidate | None = result.scalar_one_or_none()
-
-        if candidate is None:
-            raise CandidateNotFoundException(candidate_id=candidate_id)
-
-        if any(resume.name == request.name for resume in candidate.resumes):
-            raise ResumeNameConflictException(request.name)
-
-        stored_file = await self._s3_file_uploader.upload(request.file)
-
-        resume = Resume(
-            name=request.name,
-            stored_file=stored_file,
-            text_content=await _extract_text_content_from_pdf(request.file.data),
-            candidate=candidate,
-        )
-
-        self._db.add(resume)
-        await self._db.commit()
-
-        return ResumeDTO.from_model(resume)
-
-    async def get_candidate_socials(self, candidate_id: int) -> list[CandidateSocialLinkDTO]:
-        query = (
-            select(CandidateSocialLink)
-            .where(CandidateSocialLink.candidate_id == candidate_id)
-        )
-        result = await self._db.execute(query)
-        socials = result.scalars().all()
-        return [CandidateSocialLinkDTO.from_model(social) for social in socials]
-
-
-    async def update_candidate_personal_info(self, candidate_id: int, request: UpdateCandidatePersonalInfoRequest) -> CandidateDTO:
+    async def update_candidate_personal_info(
+        self, candidate_id: int, request: UpdateCandidatePersonalInfoRequest
+    ) -> CandidateDTO:
         candidate = await self._get_candidate_by_id(candidate_id)
         if candidate is None:
             raise CandidateNotFoundException(candidate_id=candidate_id)
@@ -190,6 +163,15 @@ class CandidateService:
         await self._db.commit()
         return CandidateDTO.from_model(candidate)
 
+    async def get_candidate_socials(
+        self, candidate_id: int
+    ) -> list[CandidateSocialLinkDTO]:
+        query = select(CandidateSocialLink).where(
+            CandidateSocialLink.candidate_id == candidate_id
+        )
+        result = await self._db.execute(query)
+        socials = result.scalars().all()
+        return [CandidateSocialLinkDTO.from_model(social) for social in socials]
 
 
 def _hash_password(plain_password: str) -> str:
@@ -202,13 +184,3 @@ def _verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
-
-async def _extract_text_content_from_pdf(pdf: bytes):
-    def read() -> str:
-        reader = PdfReader(stream=BytesIO(pdf))
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
-        return text
-
-    return await asyncio.to_thread(read)

@@ -31,5 +31,4 @@ class Settings(BaseSettings):
     environment: str = ENV
 
 
-
 settings = Settings()

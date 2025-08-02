@@ -21,6 +21,14 @@ class UnsupportedJobUrlException(HTTPException):
         )
 
 
+class InvalidResumeFileTypeException(HTTPException):
+    def __init__(self, content_type: str):
+        super().__init__(
+            status_code=400,
+            detail=f"Invalid resume file type '{content_type}'. Only application/pdf is supported.",
+        )
+
+
 # ===
 # 401
 # ===
