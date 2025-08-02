@@ -2,7 +2,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, HttpUrl
+from pydantic import BaseModel, EmailStr, HttpUrl, Field
 
 from job_agent.models import Candidate, CandidateSocialLink, Resume, CoverLetter, JobApplication, JobListing
 
@@ -154,3 +154,8 @@ class FileContent(BaseModel):
 class UploadResumeRequest(BaseModel):
     name: str
     file: FileContent
+
+class UpdateCandidatePersonalInfoRequest(BaseModel):
+    first_name: Optional[str] = Field(None, min_length=1)
+    last_name: Optional[str] = Field(None, min_length=1)
+    phone: Optional[str] = Field(None, min_length=1)

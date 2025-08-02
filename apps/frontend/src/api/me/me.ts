@@ -35,7 +35,8 @@ import type {
   CandidateDTO,
   CandidateSocialLinkDTO,
   ErrorModel,
-  HTTPValidationError
+  HTTPValidationError,
+  UpdateCandidatePersonalInfoRequest
 } from '.././models';
 
 
@@ -117,6 +118,152 @@ export function useGetMeMeGet<TData = Awaited<ReturnType<typeof getMeMeGet>>, TE
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMeMeGetQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+/**
+ * @summary Update Me Info
+ */
+export const updateMeInfoMePatch = (
+    updateCandidatePersonalInfoRequest: UpdateCandidatePersonalInfoRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CandidateDTO>> => {
+    
+    
+    return axios.default.patch(
+      `/me/`,
+      updateCandidatePersonalInfoRequest,options
+    );
+  }
+
+
+
+export const getUpdateMeInfoMePatchMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMeInfoMePatch>>, TError,{data: UpdateCandidatePersonalInfoRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMeInfoMePatch>>, TError,{data: UpdateCandidatePersonalInfoRequest}, TContext> => {
+
+const mutationKey = ['updateMeInfoMePatch'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMeInfoMePatch>>, {data: UpdateCandidatePersonalInfoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateMeInfoMePatch(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMeInfoMePatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateMeInfoMePatch>>>
+    export type UpdateMeInfoMePatchMutationBody = UpdateCandidatePersonalInfoRequest
+    export type UpdateMeInfoMePatchMutationError = AxiosError<ErrorModel | HTTPValidationError>
+
+    /**
+ * @summary Update Me Info
+ */
+export const useUpdateMeInfoMePatch = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMeInfoMePatch>>, TError,{data: UpdateCandidatePersonalInfoRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateMeInfoMePatch>>,
+        TError,
+        {data: UpdateCandidatePersonalInfoRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getUpdateMeInfoMePatchMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * @summary Get Me Socials
+ */
+export const getMeSocialsMeSocialsGet = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CandidateSocialLinkDTO[]>> => {
+    
+    
+    return axios.default.get(
+      `/me/socials`,options
+    );
+  }
+
+
+export const getGetMeSocialsMeSocialsGetQueryKey = () => {
+    return [`/me/socials`] as const;
+    }
+
+    
+export const getGetMeSocialsMeSocialsGetQueryOptions = <TData = Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError = AxiosError<ErrorModel>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMeSocialsMeSocialsGetQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>> = ({ signal }) => getMeSocialsMeSocialsGet({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMeSocialsMeSocialsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>>
+export type GetMeSocialsMeSocialsGetQueryError = AxiosError<ErrorModel>
+
+
+export function useGetMeSocialsMeSocialsGet<TData = Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError = AxiosError<ErrorModel>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMeSocialsMeSocialsGet<TData = Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError = AxiosError<ErrorModel>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMeSocialsMeSocialsGet<TData = Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError = AxiosError<ErrorModel>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Me Socials
+ */
+
+export function useGetMeSocialsMeSocialsGet<TData = Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError = AxiosError<ErrorModel>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeSocialsMeSocialsGet>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMeSocialsMeSocialsGetQueryOptions(options)
 
   const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

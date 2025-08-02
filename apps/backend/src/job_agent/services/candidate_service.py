@@ -24,7 +24,7 @@ from job_agent.services.exceptions import (
 )
 from job_agent.services.s3_file_uploader import S3FileUploader
 from job_agent.services.schemas import CreateCandidateRequest, CandidateLoginRequest, AddOrUpdateSocialRequest, \
-    CandidateDTO, CandidateSocialLinkDTO, UploadResumeRequest, ResumeDTO
+    CandidateDTO, CandidateSocialLinkDTO, UploadResumeRequest, ResumeDTO, UpdateCandidatePersonalInfoRequest
 
 from PyPDF2 import PdfReader
 
@@ -162,6 +162,34 @@ class CandidateService:
         await self._db.commit()
 
         return ResumeDTO.from_model(resume)
+
+    async def get_candidate_socials(self, candidate_id: int) -> list[CandidateSocialLinkDTO]:
+        query = (
+            select(CandidateSocialLink)
+            .where(CandidateSocialLink.candidate_id == candidate_id)
+        )
+        result = await self._db.execute(query)
+        socials = result.scalars().all()
+        return [CandidateSocialLinkDTO.from_model(social) for social in socials]
+
+
+    async def update_candidate_personal_info(self, candidate_id: int, request: UpdateCandidatePersonalInfoRequest) -> CandidateDTO:
+        candidate = await self._get_candidate_by_id(candidate_id)
+        if candidate is None:
+            raise CandidateNotFoundException(candidate_id=candidate_id)
+
+        if request.first_name is not None:
+            candidate.first_name = request.first_name
+
+        if request.last_name is not None:
+            candidate.last_name = request.last_name
+
+        if request.phone is not None:
+            candidate.phone = request.phone
+
+        await self._db.commit()
+        return CandidateDTO.from_model(candidate)
+
 
 
 def _hash_password(plain_password: str) -> str:

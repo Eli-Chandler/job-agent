@@ -5,7 +5,8 @@ from api.routers.utils import ErrorModel
 from job_agent.services.candidate_service import (
     CandidateService,
 )
-from job_agent.services.schemas import AddOrUpdateSocialRequest, CandidateDTO, CandidateSocialLinkDTO
+from job_agent.services.schemas import AddOrUpdateSocialRequest, CandidateDTO, CandidateSocialLinkDTO, \
+    UpdateCandidatePersonalInfoRequest
 from api.dependencies import get_candidate_service
 
 me_router = APIRouter()
@@ -24,6 +25,32 @@ async def get_me(
 ):
     return await service.get_candidate_by_id(current_user_id)
 
+@me_router.patch(
+    "/",
+    response_model=CandidateDTO,
+    responses={
+        404: {"model": ErrorModel}
+    }
+)
+async def update_me_info(
+        request: UpdateCandidatePersonalInfoRequest,
+        current_user_id: int = Depends(get_current_user_id),
+        service: CandidateService = Depends(get_candidate_service),
+):
+    return await service.update_candidate_personal_info(current_user_id, request)
+
+@me_router.get(
+    "/socials",
+    response_model=list[CandidateSocialLinkDTO],
+    responses={
+        404: {"model": ErrorModel}
+    }
+)
+async def get_me_socials(
+        current_user_id: int = Depends(get_current_user_id),
+        service: CandidateService = Depends(get_candidate_service),
+):
+    return await service.get_candidate_socials(current_user_id)
 
 @me_router.put(
     "/socials",

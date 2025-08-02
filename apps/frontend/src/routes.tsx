@@ -6,7 +6,9 @@ import App from "@/App.tsx";
 import HomePage from "@/pages/HomePage.tsx";
 import LoginPage from "@/pages/LoginPage.tsx";
 import {useUser} from "@/hooks/use-user.tsx";
-import DashboardPage from "@/pages/DashboardPage.tsx";
+import DashboardOverview from "@/pages/dashboard/DashboardOverview.tsx";
+import DashboardPage from "@/pages/dashboard/DashboardPage.tsx";
+import DashboardProfile from "@/pages/dashboard/DashboardProfile.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -28,7 +30,24 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 path: "/dashboard",
-                                element: <DashboardPage/>
+                                element: <DashboardPage/>,
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <Navigate to="overview" replace/>
+                                    },
+                                    {
+                                        path: "overview",
+                                        element: <DashboardOverview/>
+                                    },
+                                    {
+                                        path: "profile",
+                                        element: <DashboardProfile/>
+                                    },
+                                    {
+                                        path: "applications"
+                                    }
+                                ]
                             }
                         ]
                     }
