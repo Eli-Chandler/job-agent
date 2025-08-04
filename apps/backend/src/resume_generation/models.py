@@ -1,14 +1,14 @@
 from datetime import datetime
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, conlist, Field
 import re
 
 
+class ResumeTemplate(BaseModel):
+    sections: list["ResumeSection"]
+    personal_information: "ResumePersonalInformation"
+    links: list["ResumeLink"]
 
-class Resume(BaseModel):
-    sections: list['ResumeSection']
-    personal_information: 'ResumePersonalInformation'
-    links: list['ResumeLink']
 
 class ResumePersonalInformation(BaseModel):
     first_name: str
@@ -16,13 +16,16 @@ class ResumePersonalInformation(BaseModel):
     phone_number: str | None = None
     email: str | None = None
 
+
 class ResumeLink(BaseModel):
     name: str
-    link: HttpUrl
+    link: str
+
 
 class ResumeSection(BaseModel):
     title: str
-    entries: list['ResumeEntry']
+    entries: list["ResumeEntry"]
+
 
 class ResumeEntry(BaseModel):
     title: str | None = None
@@ -32,16 +35,17 @@ class ResumeEntry(BaseModel):
     end_date: datetime | None = None
     bullet_points: list[str]
 
-resume = Resume(
+
+resume = ResumeTemplate(
     personal_information=ResumePersonalInformation(
         first_name="Jake",
         last_name="Ryan",
         phone_number="123-456-7890-test",
-        email="jake@su.edu"
+        email="jake@su.edu",
     ),
     links=[
-        ResumeLink(name="LinkedIn", link=HttpUrl("https://linkedin.com/in/jake")),
-        ResumeLink(name="GitHub", link=HttpUrl("https://github.com/jake"))
+        ResumeLink(name="LinkedIn", link="https://linkedin.com/in/jake"),
+        ResumeLink(name="GitHub", link="https://github.com/jake"),
     ],
     sections=[
         ResumeSection(
@@ -53,7 +57,7 @@ resume = Resume(
                     location="Georgetown, TX",
                     start_date=datetime(2018, 8, 1),
                     end_date=datetime(2021, 5, 1),
-                    bullet_points=[]
+                    bullet_points=[],
                 ),
                 ResumeEntry(
                     title="Associate’s in Liberal Arts",
@@ -61,9 +65,9 @@ resume = Resume(
                     location="Bryan, TX",
                     start_date=datetime(2014, 8, 1),
                     end_date=datetime(2018, 5, 1),
-                    bullet_points=[]
-                )
-            ]
+                    bullet_points=[],
+                ),
+            ],
         ),
         ResumeSection(
             title="Experience",
@@ -77,8 +81,8 @@ resume = Resume(
                     bullet_points=[
                         "Developed a REST API using FastAPI and PostgreSQL to store data from learning management systems",
                         "Developed a full-stack web application using Flask, React, PostgreSQL and Docker to analyze GitHub data",
-                        "Explored ways to visualize GitHub collaboration in a classroom setting"
-                    ]
+                        "Explored ways to visualize GitHub collaboration in a classroom setting",
+                    ],
                 ),
                 ResumeEntry(
                     title="Information Technology Support Specialist",
@@ -89,8 +93,8 @@ resume = Resume(
                     bullet_points=[
                         "Communicate with managers to set up campus computers used on campus",
                         "Assess and troubleshoot computer problems brought by students, faculty and staff",
-                        "Maintain upkeep of computers, classroom equipment, and 200 printers across campus"
-                    ]
+                        "Maintain upkeep of computers, classroom equipment, and 200 printers across campus",
+                    ],
                 ),
                 ResumeEntry(
                     title="Artificial Intelligence Research Assistant",
@@ -103,11 +107,9 @@ resume = Resume(
                         "Developed a game in Java to test the generated dungeons",
                         "Contributed 50K+ lines of code to an established codebase via Git",
                         "Conducted a human subject study to determine which video game dungeon generation technique is enjoyable",
-                        "Wrote an 8-page paper and gave multiple presentations on-campus",
-                        "Presented virtually to the World Conference on Computational Intelligence"
-                    ]
-                )
-            ]
+                    ],
+                ),
+            ],
         ),
         ResumeSection(
             title="Projects",
@@ -122,8 +124,8 @@ resume = Resume(
                         "Developed a full-stack web application using with Flask serving a REST API with React as the frontend",
                         "Implemented GitHub OAuth to get data from user’s repositories",
                         "Visualized GitHub data to show collaboration",
-                        "Used Celery and Redis for asynchronous tasks"
-                    ]
+                        "Used Celery and Redis for asynchronous tasks",
+                    ],
                 ),
                 ResumeEntry(
                     title="Simple Paintball",
@@ -135,10 +137,9 @@ resume = Resume(
                         "Developed a Minecraft server plugin to entertain kids during free time for a previous job",
                         "Published plugin to websites gaining 2K+ downloads and an average 4.5/5-star review",
                         "Implemented continuous delivery using TravisCI to build the plugin upon new a release",
-                        "Collaborated with Minecraft server administrators to suggest features and get feedback about the plugin"
-                    ]
-                )
-            ]
+                    ],
+                ),
+            ],
         ),
         ResumeSection(
             title="Technical Skills",
@@ -148,10 +149,9 @@ resume = Resume(
                         "Languages: Java, Python, C/C++, SQL (Postgres), JavaScript, HTML/CSS, R",
                         "Frameworks: React, Node.js, Flask, JUnit, WordPress, Material-UI, FastAPI",
                         "Developer Tools: Git, Docker, TravisCI, Google Cloud Platform, VS Code, Visual Studio, PyCharm, IntelliJ, Eclipse",
-                        "Libraries: pandas, NumPy, Matplotlib"
                     ]
                 )
-            ]
-        )
-    ]
+            ],
+        ),
+    ],
 )

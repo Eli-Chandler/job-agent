@@ -9,6 +9,7 @@ import {useUser} from "@/hooks/use-user.tsx";
 import DashboardOverview from "@/pages/dashboard/DashboardOverview.tsx";
 import DashboardPage from "@/pages/dashboard/DashboardPage.tsx";
 import DashboardProfile from "@/pages/dashboard/DashboardProfile.tsx";
+import AddJobPage from "@/pages/dashboard/AddJobPage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
                                     },
                                     {
                                         path: "applications"
+                                    },
+                                    {
+                                        path: "add-job",
+                                        element: <AddJobPage/>
                                     }
                                 ]
                             }

@@ -12,6 +12,7 @@ export interface JobListingDTO {
   id: number;
   title: string;
   application_url: string;
+  company: string;
   source: JobListingDTOSource;
   description: JobListingDTODescription;
   posted_at: JobListingDTOPostedAt;

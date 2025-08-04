@@ -1,55 +1,42 @@
-from typing import Any
+from io import BytesIO
 
-from jinja2 import Environment, FileSystemLoader
-from pydantic import BaseModel
+from PyPDF2 import PdfReader
+from openai import OpenAI
 
-from resume_generation.models import resume
-import re
+from resume_generation.latex import render_latex_resume
+from resume_generation.models import ResumeTemplate
 
-env = Environment(
-    variable_start_string='(((',
-    variable_end_string=')))',
-    block_start_string='((*',
-    block_end_string='*))',
-    comment_start_string='((#',
-    comment_end_string='#))',
-    loader=FileSystemLoader(".")
-)
-template = env.get_template("resume_template.tex.j2")
+client = OpenAI()
 
-LATEX_SPECIAL_CHARS = {
-    "&": r"\&",
-    "%": r"\%",
-    "$": r"\$",
-    "#": r"\#",
-    "_": r"\_",
-    "{": r"\{",
-    "}": r"\}",
-    "~": r"\textasciitilde{}",
-    "^": r"\textasciicircum{}",
-    "\\": r"\textbackslash{}",
-}
-
-def latex_escape(text: str) -> str:
-    return re.sub(
-        r"([&%$#_{}~^\\])", lambda m: LATEX_SPECIAL_CHARS[m.group()], text
+def resume_to_schema(resume_text: str) -> ResumeTemplate:
+    response = client.responses.parse(
+        model="gpt-4.1-2025-04-14",
+        input=[
+            {"role": "system", "content": "Convert this text representation of a PDF resume to the provided format. Be space efficient, do not unnecessarily break into bullet points."},
+            {
+                "role": "user",
+                "content": resume_text,
+            },
+        ],
+        text_format=ResumeTemplate
     )
 
-def escape_latex_in_model(obj: Any) -> Any:
-    if isinstance(obj, str):
-        return latex_escape(obj)
-    elif isinstance(obj, list):
-        return [escape_latex_in_model(item) for item in obj]
-    elif isinstance(obj, dict):
-        return {key: escape_latex_in_model(value) for key, value in obj.items()}
-    elif isinstance(obj, BaseModel):
-        updated = {
-            field: escape_latex_in_model(getattr(obj, field))
-            for field in obj.__class__.model_fields
-        }
-        return obj.__class__(**updated)
-    else:
-        return obj  # includes None, int, datetime, etc.
+    if response.output_parsed is None:
+       raise Exception("Failed to extract text from pdf")
 
-with open("generated_resume.tex", "w") as f:
-    f.write(template.render(resume=escape_latex_in_model(resume)))
+    return response.output_parsed
+
+
+def _extract_text_content_from_pdf(filepath):
+        reader = PdfReader(filepath)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        return text
+
+resume_text = _extract_text_content_from_pdf("./RocketLabResume.pdf")
+resume = resume_to_schema(resume_text)
+
+print(resume)
+
+render_latex_resume(resume)

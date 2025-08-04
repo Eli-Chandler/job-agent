@@ -128,6 +128,7 @@ class JobListingDTO(BaseModel):
     id: int
     title: str
     application_url: str
+    company: str
     source: Optional[str]
     description: Optional[str]
     posted_at: Optional[datetime]
@@ -140,6 +141,7 @@ class JobListingDTO(BaseModel):
             id=job_listing.id,
             title=job_listing.title,
             application_url=job_listing.application_url,
+            company=job_listing.company,
             source=job_listing.source,
             description=job_listing.description,
             posted_at=job_listing.posted_at,
@@ -187,3 +189,10 @@ class StoredFileDTO(BaseModel):
 class PresignedUrlDTO(BaseModel):
     file: StoredFileDTO
     presigned_url: str
+
+
+class CreateJobRequest(BaseModel):
+    title: str
+    company: str
+    application_url: str
+    description: Optional[str] = None

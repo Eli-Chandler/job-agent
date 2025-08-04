@@ -10,12 +10,12 @@ export default function Layout() {
                     <NavBar/>
                 </header>
 
-                <div className="pt-16 px-4">
+                <div className="pt-16 px-4 relative max-w-[1600px] mx-auto">
                     <Outlet/>
                 </div>
             </div>
 
-            <footer>
+            <footer className="mb-20">
                 <FooterBar/>
             </footer>
         </>

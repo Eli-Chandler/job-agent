@@ -5,7 +5,7 @@ import {Link} from "react-router";
 import {useUser} from "@/hooks/use-user.tsx";
 
 export default function HomePage() {
-    const user = useUser();
+    const {user} = useUser();
 
     return (
         <div className="max-w-4xl mx-auto">

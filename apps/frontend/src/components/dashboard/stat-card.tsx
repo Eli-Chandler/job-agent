@@ -1,19 +1,5 @@
-import {Button} from "@/components/ui/button.tsx";
-import {type LucideIcon, PlusIcon} from "lucide-react";
-import {Separator} from "@/components/ui/separator.tsx";
+import type {LucideIcon} from "lucide-react";
 import {Card, CardContent, CardTitle} from "@/components/ui/card.tsx";
-
-export function DashboardHeader({title}: { title: string }) {
-    return (
-        <div className="w-full">
-            <div className="w-full flex justify-between mb-2">
-                <h1 className="text-4xl font-bold text-primary">{title}</h1>
-                <Button size="lg"><PlusIcon/>Add Job</Button>
-            </div>
-            <Separator/>
-        </div>
-    )
-}
 
 type StatCardProps = {
     title: string;

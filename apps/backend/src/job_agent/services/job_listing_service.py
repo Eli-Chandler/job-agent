@@ -3,10 +3,11 @@ from urllib.parse import urlparse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from job_agent.models import JobListing
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
 
 from job_agent.services.exceptions import UnsupportedJobUrlException
-from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest
+from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest, CreateJobRequest
 
 
 class JobService:
@@ -17,6 +18,18 @@ class JobService:
     async def fetch_job(self, request: ScrapeJobListingRequest) -> JobListingDTO:
         job_id = self._parse_url_id(request.job_url)
         job = await self._job_scraper.scrape_job(job_id)
+        self._db.add(job)
+        await self._db.commit()
+        return JobListingDTO.from_model(job)
+
+    async def create_job_manual(self, request: CreateJobRequest) -> JobListingDTO:
+        job = JobListing(
+            title=request.title,
+            company=request.company,
+            application_url=request.application_url,
+            description=request.description,
+            source="manual"
+        )
         self._db.add(job)
         await self._db.commit()
         return JobListingDTO.from_model(job)

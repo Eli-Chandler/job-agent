@@ -17,3 +17,9 @@ An agent for finding and applying to jobs
 ## Further ideas:
 
 * Ask user if they have skills from the job listing, remember skills the user has selected in the past
+
+## Remember:
+
+* Maybe we just return job DTO to users instead of creating it from link and then they can just upload it themselves'
+* This lets them modify details more naturally
+* Resume generation -- instead of uploading resumes we can have a knowledgebase that can be populated from resume

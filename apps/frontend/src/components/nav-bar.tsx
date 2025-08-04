@@ -6,7 +6,7 @@ import {useUser} from "@/hooks/use-user.tsx";
 import {ModeToggle} from "@/components/mode-toggle.tsx";
 
 export default function NavBar() {
-    const user = useUser();
+    const {user} = useUser();
 
     console.log(user)
 
@@ -21,7 +21,7 @@ export default function NavBar() {
                         user ? (
                                 <Link to={"/dashboard"}>
                                     <LucideLayoutDashboard className="w-4 h-4"/>
-                                    Dashboard
+                                    user
                                 </Link>
 
                             )

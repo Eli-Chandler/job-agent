@@ -17,6 +17,8 @@ export * from './coverLetterDTO';
 export * from './createCandidateRequest';
 export * from './createJobApplicationRequest';
 export * from './createJobApplicationRequestCoverLetterId';
+export * from './createJobRequest';
+export * from './createJobRequestDescription';
 export * from './errorModel';
 export * from './hTTPValidationError';
 export * from './jobApplicationDTO';
