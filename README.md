@@ -23,3 +23,7 @@ An agent for finding and applying to jobs
 * Maybe we just return job DTO to users instead of creating it from link and then they can just upload it themselves'
 * This lets them modify details more naturally
 * Resume generation -- instead of uploading resumes we can have a knowledgebase that can be populated from resume
+
+* Allow user to edit resume structure and cover letter structure on frontend, render on backend and return pdf for preview
+* Allow user to press generate resume/generate cover letter
+* Allow giving instructions for the generation, and also let the user modify the generated

@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/form"
 import {Input} from "@/components/ui/input"
 import {useCreateJobFromUrl, useCreateJobManual} from "@/api/job-listings/job-listings.ts";
-import {BuildingIcon, LinkIcon} from "lucide-react";
+import {ArrowLeftIcon, BuildingIcon, LinkIcon} from "lucide-react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
 import {IconInput} from "@/components/ui/icon-input.tsx";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import type {JobListingDTO} from "@/api/models";
+import {useState} from "react";
+import {JobCard} from "@/components/ui/job-card.tsx";
 
 const hiringCafeFormSchema = z.object({
     jobUrl: z.url()
@@ -38,6 +40,18 @@ interface CreateJobFormProps {
 }
 
 export default function CreateJobForm({onJobCreated}: CreateJobFormProps) {
+    const [job, setJob] = useState<JobListingDTO | null>(null);
+
+    if (job) {
+        return (
+            <div className="flex flex-col gap-2">
+                <Button className="self-start" variant="ghost" onClick={() => setJob(null)}><ArrowLeftIcon/>Back</Button>
+                <JobCard job={job}/>
+                <Button className="self-end" onClick={() => onJobCreated(job)}>Submit</Button>
+            </div>
+        )
+    }
+
     return (
         <Tabs defaultValue="hiringcafe">
             <TabsList className="grid w-full grid-cols-2">
@@ -45,10 +59,10 @@ export default function CreateJobForm({onJobCreated}: CreateJobFormProps) {
                 <TabsTrigger value="manual">Manual</TabsTrigger>
             </TabsList>
             <TabsContent value="hiringcafe" className="mt-4">
-                <HiringCafeForm onJobCreated={onJobCreated}/>
+                <HiringCafeForm onJobCreated={setJob}/>
             </TabsContent>
             <TabsContent value="manual" className="mt-4">
-                <ManualJobForm onJobCreated={onJobCreated}/>
+                <ManualJobForm onJobCreated={setJob}/>
             </TabsContent>
         </Tabs>
     )
@@ -121,7 +135,8 @@ function ManualJobForm({onJobCreated}: CreateJobFormProps) {
                             <FormControl>
                                 <IconInput icon={LinkIcon} placeholder="https://company.com/job/..." {...field} />
                             </FormControl>
-                            <FormDescription>The URL to apply with. (Important to get this right for AI Apply)</FormDescription>
+                            <FormDescription>The URL to apply with. (Important to get this right for AI
+                                Apply)</FormDescription>
                             <FormMessage/>
                         </FormItem>
                     )}
@@ -141,9 +156,12 @@ function ManualJobForm({onJobCreated}: CreateJobFormProps) {
                     )}
                 />
 
-                <Button type="submit" disabled={!form.formState.isValid || mutation.isPending}>
-                    {mutation.isPending ? "Fetching..." : "Fetch"}
-                </Button>
+                <div className="flex justify-end">
+                    <Button type="submit"
+                        disabled={!form.formState.isValid || mutation.isPending}>
+                        {mutation.isPending ? "Sumibtting..." : "Submit"}
+                    </Button>
+                </div>
                 {
                     errorMessage && <p className="text-destructive">{errorMessage}</p>
                 }
@@ -191,9 +209,11 @@ function HiringCafeForm({onJobCreated}: CreateJobFormProps) {
                     )}
                 />
 
-                <Button type="submit" disabled={!form.formState.isValid || mutation.isPending}>
-                    {mutation.isPending ? "Fetching..." : "Fetch"}
-                </Button>
+                <div className="flex justify-end">
+                    <Button type="submit" disabled={!form.formState.isValid || mutation.isPending}>
+                        {mutation.isPending ? "Fetching..." : "Fetch"}
+                    </Button>
+                </div>
                 {
                     errorMessage && <p className="text-destructive">{errorMessage}</p>
                 }
@@ -201,3 +221,5 @@ function HiringCafeForm({onJobCreated}: CreateJobFormProps) {
         </Form>
     );
 }
+
+

@@ -7,7 +7,13 @@ export function useUser(): {
     error?: string;
     refreshUser: () => Promise<void>;
 } {
-    const {data, isLoading, error, refetch} = useGetCurrentlyAuthenticatedUser();
+    const {data, isLoading, error, refetch} = useGetCurrentlyAuthenticatedUser({
+        query: {
+            refetchOnWindowFocus: false,
+            refetchInterval: 1000 * 60 * 5, // 5 minutes
+            retry: false
+        }
+    });
 
     return {
         user: data?.data,

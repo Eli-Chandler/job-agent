@@ -1,6 +1,7 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {Outlet} from "react-router";
 import {ThemeProvider} from "@/components/theme-provider";
+import {TooltipProvider} from "@/components/ui/tooltip";
 
 function App() {
     const queryClient = new QueryClient();
@@ -8,7 +9,9 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-                <Outlet/>
+                <TooltipProvider>
+                    <Outlet/>
+                </TooltipProvider>
             </ThemeProvider>
         </QueryClientProvider>
     )

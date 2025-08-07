@@ -16,17 +16,6 @@ export default function ResumeManagement() {
     const uploadResumeMutation = useUploadResume();
     const deleteResumeMutation = useDeleteResume();
 
-
-    async function handleViewResume(resumeId: number) {
-        try {
-            const response = await getResumePresignedUrl(resumeId);
-            const url = response.data.presigned_url;
-            if (url) window.open(url, "_blank");
-        } catch (err) {
-            console.error("Failed to get presigned URL:", err);
-        }
-    }
-
     async function handleDeleteResume(resumeId: number) {
         await deleteResumeMutation.mutateAsync({resumeId: resumeId});
         await refetchResumes();
@@ -78,12 +67,11 @@ export default function ResumeManagement() {
                             return (
 
 
-                                <Resume
+                                <ResumeCard
                                     key={resume.id}
                                     resume={resume}
                                     isEditing={isEditing}
                                     onDelete={() => handleDeleteResume(resume.id)}
-                                    onView={() => handleViewResume(resume.id)}
                                 />
                             );
                         })
@@ -109,14 +97,23 @@ export default function ResumeManagement() {
     );
 }
 
-interface ResumeProps {
+interface ResumeCardProps {
     resume: ResumeDTO;
-    isEditing: boolean;
-    onDelete: () => void;
-    onView: () => void;
+    isEditing?: boolean;
+    onDelete?: () => void;
 }
 
-function Resume({resume, isEditing, onDelete, onView}: ResumeProps) {
+export function ResumeCard({resume, isEditing, onDelete}: ResumeCardProps) {
+    async function handleViewResume() {
+        try {
+            const response = await getResumePresignedUrl(resume.id);
+            const url = response.data.presigned_url;
+            if (url) window.open(url, "_blank");
+        } catch (err) {
+            console.error("Failed to get presigned URL:", err);
+        }
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -128,7 +125,7 @@ function Resume({resume, isEditing, onDelete, onView}: ResumeProps) {
                 </CardDescription>
             </CardHeader>
             <CardFooter className="gap-1">
-                <Button onClick={onView}><EyeIcon/>View</Button>
+                <Button type="button" onClick={handleViewResume}><EyeIcon/>View</Button>
                 {
                     isEditing && <Button onClick={onDelete} variant="destructive" size="icon"><TrashIcon/></Button>
                 }
