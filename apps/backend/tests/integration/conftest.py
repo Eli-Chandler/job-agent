@@ -12,6 +12,10 @@ from types_aiobotocore_s3.client import S3Client
 
 from job_agent.models import Base
 from job_agent.services.s3_file_uploader import S3FileUploader
+from testcontainers.core import testcontainers_config
+
+# Since we're re-using containers ryuk is useless anyway, this will make startup faster
+testcontainers_config.ryuk_disabled = True
 
 BUCKET_NAME = 'test-bucket'
 
