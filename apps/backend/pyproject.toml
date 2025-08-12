@@ -20,9 +20,12 @@ dependencies = [
     "mypy>=1.11",
     "pydantic[email]>=2.5.3",
     "pypdf2>=3.0.1",
+    "pytest-aioboto3>=0.6.0",
+    "pytest-xdist>=3.8.0",
     "python-jose[cryptography]>=3.5.0",
     "python-multipart>=0.0.20",
     "sqlalchemy[asyncio]>=2.0.41",
+    "testcontainers>=4.12.0",
 ]
 
 [build-system]
@@ -38,9 +41,13 @@ dev = [
     "pytest-asyncio>=1.1.0",
     "ruff>=0.12.5",
     "ruff-lsp>=0.0.62",
+    "testcontainers",
     "types-aiobotocore>=2.23.2",
     "types-aiobotocore-s3>=2.23.2",
     "types-docker>=7.1.0.20250705",
     "types-python-jose>=3.5.0.20250531",
 ]
+
+[tool.uv.sources]
+testcontainers = { git = "https://github.com/Eli-Chandler/reusable-testcontainers-python.git" }
 
