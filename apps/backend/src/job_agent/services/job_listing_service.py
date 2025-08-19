@@ -7,7 +7,12 @@ from job_agent.models import JobListing
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
 
 from job_agent.services.exceptions import UnsupportedJobUrlException
-from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest, CreateJobRequest
+from job_agent.services.schemas import (
+    JobListingDTO,
+    ScrapeJobListingRequest,
+    CreateJobRequest,
+    ScrapedJobDTO,
+)
 
 
 class JobService:
@@ -15,12 +20,10 @@ class JobService:
         self._db = db
         self._job_scraper = job_scraper
 
-    async def fetch_job(self, request: ScrapeJobListingRequest) -> JobListingDTO:
+    async def fetch_job(self, request: ScrapeJobListingRequest) -> ScrapedJobDTO:
         job_id = self._parse_url_id(request.job_url)
         job = await self._job_scraper.scrape_job(job_id)
-        self._db.add(job)
-        await self._db.commit()
-        return JobListingDTO.from_model(job)
+        return ScrapedJobDTO.from_model(job)
 
     async def create_job_manual(self, request: CreateJobRequest) -> JobListingDTO:
         job = JobListing(
@@ -28,7 +31,7 @@ class JobService:
             company=request.company,
             application_url=request.application_url,
             description=request.description,
-            source="manual"
+            source="manual",
         )
         self._db.add(job)
         await self._db.commit()

@@ -17,7 +17,8 @@ from testcontainers.core import testcontainers_config
 # Since we're re-using containers ryuk is useless anyway, this will make startup faster
 testcontainers_config.ryuk_disabled = True
 
-BUCKET_NAME = 'test-bucket'
+BUCKET_NAME = "test-bucket"
+
 
 @pytest_asyncio.fixture(scope="function")
 async def s3_client(aioboto3_s3_client: S3Client) -> AsyncGenerator[S3Client, None]:
@@ -36,15 +37,10 @@ async def s3_client(aioboto3_s3_client: S3Client) -> AsyncGenerator[S3Client, No
     yield client
 
 
-
 @pytest_asyncio.fixture(scope="function")
-async def s3_file_uploader(
-    db_session: AsyncSession, s3_client: S3Client
-) -> AsyncGenerator[S3FileUploader, None]:
+async def s3_file_uploader(db_session: AsyncSession, s3_client: S3Client) -> AsyncGenerator[S3FileUploader, None]:
     """Create S3FileUploader with cleanup."""
-    uploader = S3FileUploader(
-        db=db_session, s3_client=s3_client, bucket_name=BUCKET_NAME
-    )
+    uploader = S3FileUploader(db=db_session, s3_client=s3_client, bucket_name=BUCKET_NAME)
 
     yield uploader
 
@@ -66,9 +62,7 @@ async def s3_file_uploader(
 async def db_engine():
     postgres_container = PostgresContainer("postgres:16-alpine", driver=None, reuse=True)
     postgres_container.start()
-    async_url = postgres_container.get_connection_url().replace(
-        "postgresql://", "postgresql+asyncpg://"
-    )
+    async_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
     engine = create_async_engine(async_url, echo=False, poolclass=NullPool)
 
     async with engine.begin() as conn:
@@ -79,7 +73,6 @@ async def db_engine():
         yield engine
     finally:
         await engine.dispose()
-
 
 
 @pytest_asyncio.fixture(scope="function")

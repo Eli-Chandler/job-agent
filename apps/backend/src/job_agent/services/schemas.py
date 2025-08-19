@@ -6,7 +6,6 @@ from pydantic import BaseModel, EmailStr, HttpUrl, Field
 
 from job_agent.models import (
     Candidate,
-    CandidateSocialLink,
     Resume,
     CoverLetter,
     JobApplication,
@@ -18,7 +17,6 @@ from job_agent.models import (
 class CreateCandidateRequest(BaseModel):
     first_name: str
     last_name: str
-    phone: str
     email: EmailStr
     password: str
 
@@ -38,7 +36,6 @@ class CandidateDTO(BaseModel):
     first_name: str
     last_name: str
     full_name: str
-    phone: str
     email: str
     # socials: list["CandidateSocialLinkDTO"]
     # resumes: list["ResumeDTO"]
@@ -51,22 +48,7 @@ class CandidateDTO(BaseModel):
             first_name=model.first_name,
             last_name=model.last_name,
             full_name=model.full_name,
-            phone=model.phone,
             email=model.email,
-        )
-
-
-class CandidateSocialLinkDTO(BaseModel):
-    id: int
-    name: str
-    link: str
-
-    @classmethod
-    def from_model(cls, model: CandidateSocialLink) -> "CandidateSocialLinkDTO":
-        return cls(
-            id=model.id,
-            name=model.name,
-            link=model.link,
         )
 
 
@@ -112,12 +94,8 @@ class JobApplicationDTO(BaseModel):
         return cls(
             id=job_application.id,
             job_listing=JobListingDTO.from_model(job_application.job_listing),
-            used_resume=ResumeDTO.from_model(job_application.used_resume)
-            if job_application.used_resume
-            else None,
-            used_cover_letter=CoverLetterDTO.from_model(
-                job_application.used_cover_letter
-            )
+            used_resume=ResumeDTO.from_model(job_application.used_resume) if job_application.used_resume else None,
+            used_cover_letter=CoverLetterDTO.from_model(job_application.used_cover_letter)
             if job_application.used_cover_letter
             else None,
             notes=job_application.notes,
@@ -147,6 +125,26 @@ class JobListingDTO(BaseModel):
             posted_at=job_listing.posted_at,
             scraped_at=job_listing.scraped_at,
             updated_at=job_listing.updated_at,
+        )
+
+
+class ScrapedJobDTO(BaseModel):
+    title: str
+    application_url: str
+    company: str
+    description: Optional[str] = None
+    source: Optional[str] = None
+    posted_at: Optional[datetime] = None
+
+    @classmethod
+    def from_model(cls, job_listing: JobListing) -> "ScrapedJobDTO":
+        return cls(
+            title=job_listing.title,
+            application_url=job_listing.application_url,
+            description=job_listing.description,
+            company=job_listing.company,
+            source=job_listing.source,
+            posted_at=job_listing.posted_at,
         )
 
 

@@ -1,3 +1,5 @@
+
+
 .PHONY: run test format
 
 dev:
@@ -8,3 +10,10 @@ test:
 
 format:
 	ruff format
+migrate:
+	uv run alembic upgrade head
+client:
+	cd ../../scripts && ./generate-frontend-client.sh
+migration:
+	@read -p "Enter migration message: " MSG; \
+	uv run alembic revision --autogenerate -m "$$MSG"

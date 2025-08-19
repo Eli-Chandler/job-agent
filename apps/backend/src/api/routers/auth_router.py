@@ -66,9 +66,7 @@ async def login(
     service: CandidateService = Depends(get_candidate_service),
 ):
     try:
-        login_request = CandidateLoginRequest(
-            email=form_data.username, password=form_data.password
-        )
+        login_request = CandidateLoginRequest(email=form_data.username, password=form_data.password)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=json.loads(e.json()))
     result = await service.get_user_by_email_and_password(login_request)

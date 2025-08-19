@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from types_aiobotocore_s3 import S3Client
 
+from job_agent.features.profile.profile_service import ProfileService
 from job_agent.scrape.dependencies import get_job_scraper
 from job_agent.scrape.job_scraper import HiringCafeJobScraper
 from job_agent.services.candidate_service import CandidateService
@@ -68,3 +69,7 @@ async def get_resume_service(
     s3_file_uploader: S3FileUploader = Depends(get_s3_file_uploader),
 ) -> ResumeService:
     return ResumeService(db, s3_file_uploader)
+
+
+async def get_profile_service(db: AsyncSession = Depends(get_db_session)) -> ProfileService:
+    return ProfileService(db)

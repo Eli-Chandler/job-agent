@@ -142,9 +142,7 @@ async def test_get_user_by_email_and_password__should_raise__when_password_wrong
     # Act & Assert
     with pytest.raises(WrongCredentialsException):
         await service.get_user_by_email_and_password(
-            CandidateLoginRequest(
-                email="wrongpass@example.com", password="wrongpassword"
-            )
+            CandidateLoginRequest(email="wrongpass@example.com", password="wrongpassword")
         )
 
 
@@ -176,9 +174,7 @@ async def test_get_candidate_by_id__should_raise__when_not_found(service, db_ses
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_add_when_not_exists(
-    service, db_session
-):
+async def test_add_or_update_social_link__should_add_when_not_exists(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Anna",
@@ -190,9 +186,7 @@ async def test_add_or_update_social_link__should_add_when_not_exists(
     db_session.add(candidate)
     await db_session.commit()
 
-    request = AddOrUpdateSocialRequest(
-        name="LinkedIn", link=HttpUrl("https://linkedin.com/in/anna")
-    )
+    request = AddOrUpdateSocialRequest(name="LinkedIn", link=HttpUrl("https://linkedin.com/in/anna"))
 
     # Act
     dto = await service.add_or_update_social_link(candidate.id, request)
@@ -202,18 +196,14 @@ async def test_add_or_update_social_link__should_add_when_not_exists(
     assert dto.link == "https://linkedin.com/in/anna"
 
     query = await db_session.execute(
-        CandidateSocialLink.__table__.select().where(
-            CandidateSocialLink.candidate_id == candidate.id
-        )
+        CandidateSocialLink.__table__.select().where(CandidateSocialLink.candidate_id == candidate.id)
     )
     socials = query.fetchall()
     assert any(s.name == "LinkedIn" for s in socials)
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_update_when_exists(
-    service, db_session
-):
+async def test_add_or_update_social_link__should_update_when_exists(service, db_session):
     # Arrange
     candidate = Candidate(
         first_name="Liam",
@@ -222,9 +212,7 @@ async def test_add_or_update_social_link__should_update_when_exists(
         email="liam@example.com",
         hashed_password="irrelevant",
     )
-    social = CandidateSocialLink(
-        name="GitHub", link="https://github.com/old", candidate=candidate
-    )
+    social = CandidateSocialLink(name="GitHub", link="https://github.com/old", candidate=candidate)
     db_session.add(candidate)
     db_session.add(social)
     await db_session.commit()
@@ -243,13 +231,9 @@ async def test_add_or_update_social_link__should_update_when_exists(
 
 
 @pytest.mark.asyncio
-async def test_add_or_update_social_link__should_raise__when_candidate_not_found(
-    service, db_session
-):
+async def test_add_or_update_social_link__should_raise__when_candidate_not_found(service, db_session):
     # Arrange
-    request = AddOrUpdateSocialRequest(
-        name="LinkedIn", link=HttpUrl("https://linkedin.com")
-    )
+    request = AddOrUpdateSocialRequest(name="LinkedIn", link=HttpUrl("https://linkedin.com"))
 
     # Act & Assert
     with pytest.raises(CandidateNotFoundException):
@@ -266,9 +250,7 @@ async def test_delete_social_link__should_work__when_exists(service, db_session)
         email="eli@example.com",
         hashed_password="irrelevant",
     )
-    social = CandidateSocialLink(
-        name="Twitter", link="https://twitter.com/eli", candidate=candidate
-    )
+    social = CandidateSocialLink(name="Twitter", link="https://twitter.com/eli", candidate=candidate)
     db_session.add(candidate)
     db_session.add(social)
     await db_session.commit()

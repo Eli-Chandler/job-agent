@@ -18,9 +18,7 @@ class BrowserApplicationAgent(ApplicationAgent):
         self.model = model
         self.headless = headless
 
-    async def apply(
-        self, job_listing: JobListing, applicant_profile: Candidate
-    ) -> JobApplication:
+    async def apply(self, job_listing: JobListing, applicant_profile: Candidate) -> JobApplication:
         controller = Controller(output_model=ApplicationAgentResult)
         resume_text = _convert_resume_to_text(applicant_profile.resumes[0])
         llm = ChatOpenAI(model=self.model)

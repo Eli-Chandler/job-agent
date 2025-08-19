@@ -19,11 +19,7 @@ class JobApplicationService:
         self._db = db
 
     async def _get_candidate_by_id(self, candidate_id: int) -> Candidate:
-        query = (
-            select(Candidate)
-            .where(Candidate.id == candidate_id)
-            .options(selectinload(Candidate.applications))
-        )
+        query = select(Candidate).where(Candidate.id == candidate_id).options(selectinload(Candidate.applications))
         result = await self._db.execute(query)
         candidate = result.scalar_one_or_none()
 
@@ -43,11 +39,7 @@ class JobApplicationService:
         return job_listing
 
     async def _get_resume(self, user_id: int, resume_id: int) -> Resume:
-        query = (
-            select(Resume)
-            .where(Resume.id == resume_id)
-            .where(Resume.candidate_id == user_id)
-        )
+        query = select(Resume).where(Resume.id == resume_id).where(Resume.candidate_id == user_id)
         result = await self._db.execute(query)
         resume = result.scalar_one_or_none()
 
@@ -56,14 +48,8 @@ class JobApplicationService:
 
         return resume
 
-    async def _get_cover_letter(
-        self, user_id: int, cover_letter_id: int
-    ) -> Optional[CoverLetter]:
-        query = (
-            select(CoverLetter)
-            .where(CoverLetter.id == cover_letter_id)
-            .where(CoverLetter.candidate_id == user_id)
-        )
+    async def _get_cover_letter(self, user_id: int, cover_letter_id: int) -> Optional[CoverLetter]:
+        query = select(CoverLetter).where(CoverLetter.id == cover_letter_id).where(CoverLetter.candidate_id == user_id)
         result = await self._db.execute(query)
         cover_letter = result.scalar_one_or_none()
 
@@ -79,15 +65,9 @@ class JobApplicationService:
 
         candidate = await self._get_candidate_by_id(candidate_id)
         job_listing = await self._get_job_listing_by_id(request.job_listing_id)
-        resume = (
-            await self._get_resume(candidate.id, request.resume_id)
-            if request.resume_id
-            else None
-        )
+        resume = await self._get_resume(candidate.id, request.resume_id) if request.resume_id else None
         cover_letter = (
-            await self._get_cover_letter(candidate.id, request.cover_letter_id)
-            if request.cover_letter_id
-            else None
+            await self._get_cover_letter(candidate.id, request.cover_letter_id) if request.cover_letter_id else None
         )
 
         job_application = JobApplication(

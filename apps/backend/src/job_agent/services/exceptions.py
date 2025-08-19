@@ -57,9 +57,7 @@ class EntityWithIdNotFoundException(HTTPException):
 
 
 class CandidateNotFoundException(HTTPException):
-    def __init__(
-        self, candidate_id: Optional[int] = None, candidate_email: Optional[str] = None
-    ):
+    def __init__(self, candidate_id: Optional[int] = None, candidate_email: Optional[str] = None):
         message = "Candidate not found"
         if candidate_id is not None:
             message = f"Candidate with id {candidate_id} not found"

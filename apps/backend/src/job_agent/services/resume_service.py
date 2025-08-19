@@ -23,17 +23,11 @@ class ResumeService:
         self._db = db
         self._s3_file_uploader = s3_file_uploader
 
-    async def upload_resume(
-        self, candidate_id: int, request: UploadResumeRequest
-    ) -> ResumeDTO:
+    async def upload_resume(self, candidate_id: int, request: UploadResumeRequest) -> ResumeDTO:
         if request.file.content_type != "application/pdf":
             raise InvalidResumeFileTypeException(request.file.content_type)
 
-        query = (
-            select(Candidate)
-            .where(Candidate.id == candidate_id)
-            .options(selectinload(Candidate.resumes))
-        )
+        query = select(Candidate).where(Candidate.id == candidate_id).options(selectinload(Candidate.resumes))
         result = await self._db.execute(query)
         candidate: Candidate | None = result.scalar_one_or_none()
 
@@ -63,9 +57,7 @@ class ResumeService:
         resumes = result.scalars().all()
         return [ResumeDTO.from_model(resume) for resume in resumes]
 
-    async def get_resume_presigned_url(
-        self, candidate_id: int, resume_id: int
-    ) -> PresignedUrlDTO:
+    async def get_resume_presigned_url(self, candidate_id: int, resume_id: int) -> PresignedUrlDTO:
         result = await self._db.execute(
             select(Resume)
             .where(Resume.candidate_id == candidate_id)

@@ -43,16 +43,12 @@ def escape_latex_in_model(obj: Any) -> Any:
     elif isinstance(obj, dict):
         return {key: escape_latex_in_model(value) for key, value in obj.items()}
     elif isinstance(obj, BaseModel):
-        updated = {
-            field: escape_latex_in_model(getattr(obj, field))
-            for field in obj.__class__.model_fields
-        }
+        updated = {field: escape_latex_in_model(getattr(obj, field)) for field in obj.__class__.model_fields}
         return obj.__class__(**updated)
     else:
         return obj  # includes None, int, datetime, etc.
 
+
 def render_latex_resume(resume: ResumeTemplate):
     with open("generated_resume.tex", "w") as f:
         f.write(template.render(resume=escape_latex_in_model(resume)))
-
-

@@ -15,18 +15,14 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import {Input} from "@/components/ui/input"
-import {useCreateJobFromUrl, useCreateJobManual} from "@/api/job-listings/job-listings.ts";
-import {ArrowLeftIcon, BuildingIcon, LinkIcon} from "lucide-react";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
+import {useCreateJobManual, useGetJobFromUrl} from "@/api/job-listings/job-listings.ts";
+import {BuildingIcon, LinkIcon} from "lucide-react";
 import {IconInput} from "@/components/ui/icon-input.tsx";
 import {Textarea} from "@/components/ui/textarea.tsx";
-import type {JobListingDTO} from "@/api/models";
+import type {JobListingDTO, ScrapedJobDTO} from "@/api/models";
 import {useState} from "react";
-import {JobCard} from "@/components/ui/job-card.tsx";
+import {Separator} from "@/components/ui/separator.tsx";
 
-const hiringCafeFormSchema = z.object({
-    jobUrl: z.url()
-});
 
 const manualFormSchema = z.object({
     title: z.string().min(1).max(100),
@@ -40,35 +36,6 @@ interface CreateJobFormProps {
 }
 
 export default function CreateJobForm({onJobCreated}: CreateJobFormProps) {
-    const [job, setJob] = useState<JobListingDTO | null>(null);
-
-    if (job) {
-        return (
-            <div className="flex flex-col gap-2">
-                <Button className="self-start" variant="ghost" onClick={() => setJob(null)}><ArrowLeftIcon/>Back</Button>
-                <JobCard job={job}/>
-                <Button className="self-end" onClick={() => onJobCreated(job)}>Submit</Button>
-            </div>
-        )
-    }
-
-    return (
-        <Tabs defaultValue="hiringcafe">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="hiringcafe">Hiring.Cafe</TabsTrigger>
-                <TabsTrigger value="manual">Manual</TabsTrigger>
-            </TabsList>
-            <TabsContent value="hiringcafe" className="mt-4">
-                <HiringCafeForm onJobCreated={setJob}/>
-            </TabsContent>
-            <TabsContent value="manual" className="mt-4">
-                <ManualJobForm onJobCreated={setJob}/>
-            </TabsContent>
-        </Tabs>
-    )
-}
-
-function ManualJobForm({onJobCreated}: CreateJobFormProps) {
     const form = useForm<z.infer<typeof manualFormSchema>>({
         resolver: zodResolver(manualFormSchema),
         defaultValues: {
@@ -81,6 +48,25 @@ function ManualJobForm({onJobCreated}: CreateJobFormProps) {
     const mutation = useCreateJobManual();
     const errorMessage = mutation.error?.response?.data.detail?.toString() ?? "Something went wrong";
 
+    // Function to handle scraped job data and populate form
+    const handleJobScraped = (scrapedJob: ScrapedJobDTO) => {
+        // Populate the form fields with the scraped data
+        if (scrapedJob.title) {
+            form.setValue("title", scrapedJob.title);
+        }
+        if (scrapedJob.company) {
+            form.setValue("company", scrapedJob.company);
+        }
+        if (scrapedJob.application_url) {
+            form.setValue("application_url", scrapedJob.application_url);
+        }
+        if (scrapedJob.description) {
+            form.setValue("description", scrapedJob.description);
+        }
+
+        // Trigger validation after setting values
+        form.trigger();
+    };
 
     async function onSubmit(values: z.infer<typeof manualFormSchema>) {
         const result = await mutation.mutateAsync({
@@ -95,131 +81,114 @@ function ManualJobForm({onJobCreated}: CreateJobFormProps) {
     }
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <div className="flex flex-col gap-6">
+            <HiringCafeInput onJobScraped={handleJobScraped} />
+            <Separator/>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Job Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Software Engineer" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="company"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Company</FormLabel>
+                                    <FormControl>
+                                        <IconInput icon={BuildingIcon} placeholder="Evil Corp." {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <FormField
                         control={form.control}
-                        name="title"
+                        name="application_url"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Job Title</FormLabel>
+                                <FormLabel>Application URL</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Software Engineer" {...field} />
+                                    <IconInput icon={LinkIcon} placeholder="https://company.com/job/..." {...field} />
                                 </FormControl>
+                                <FormDescription>The URL to apply with. (Important to get this right for AI
+                                    Apply)</FormDescription>
                                 <FormMessage/>
                             </FormItem>
-
                         )}
                     />
                     <FormField
                         control={form.control}
-                        name="company"
+                        name="description"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Company</FormLabel>
+                                <FormLabel>Job Description</FormLabel>
                                 <FormControl>
-                                    <IconInput icon={BuildingIcon} placeholder="Evil Corp." {...field} />
+                                    <Textarea placeholder="https://company.com/job/..." {...field} />
                                 </FormControl>
+                                <FormDescription>Optional but very important for AI Resume/AI Cover
+                                    Letter</FormDescription>
                                 <FormMessage/>
                             </FormItem>
                         )}
                     />
-                </div>
-                <FormField
-                    control={form.control}
-                    name="application_url"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Application URL</FormLabel>
-                            <FormControl>
-                                <IconInput icon={LinkIcon} placeholder="https://company.com/job/..." {...field} />
-                            </FormControl>
-                            <FormDescription>The URL to apply with. (Important to get this right for AI
-                                Apply)</FormDescription>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="description"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Job Description</FormLabel>
-                            <FormControl>
-                                <Textarea placeholder="https://company.com/job/..." {...field} />
-                            </FormControl>
-                            <FormDescription>Optional but very important for AI Resume/AI Cover Letter</FormDescription>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
 
-                <div className="flex justify-end">
-                    <Button type="submit"
-                        disabled={!form.formState.isValid || mutation.isPending}>
-                        {mutation.isPending ? "Sumibtting..." : "Submit"}
-                    </Button>
-                </div>
-                {
-                    errorMessage && <p className="text-destructive">{errorMessage}</p>
-                }
-            </form>
-        </Form>
-    )
-        ;
-}
-
-function HiringCafeForm({onJobCreated}: CreateJobFormProps) {
-    const mutation = useCreateJobFromUrl();
-    const form = useForm<z.infer<typeof hiringCafeFormSchema>>({
-        resolver: zodResolver(hiringCafeFormSchema),
-        defaultValues: {
-            jobUrl: ""
-        },
-    });
-
-    const errorMessage = mutation.error?.response?.data.detail?.toString() ?? "Something went wrong"
-
-    async function onSubmit(values: z.infer<typeof hiringCafeFormSchema>) {
-        const result = await mutation.mutateAsync({
-            data: {job_url: values.jobUrl}
-        });
-        onJobCreated(result.data);
-    }
-
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                    control={form.control}
-                    name="jobUrl"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Hiring.cafe Job Listing URL</FormLabel>
-                            <FormControl>
-                                <IconInput icon={LinkIcon} placeholder="https://hiring.cafe/job/..." {...field} />
-                            </FormControl>
-                            <FormDescription className="flex gap-0.5 items-center">
-                                Job URL when pressing Share → Copy Link
-                            </FormDescription>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
-
-                <div className="flex justify-end">
-                    <Button type="submit" disabled={!form.formState.isValid || mutation.isPending}>
-                        {mutation.isPending ? "Fetching..." : "Fetch"}
-                    </Button>
-                </div>
-                {
-                    errorMessage && <p className="text-destructive">{errorMessage}</p>
-                }
-            </form>
-        </Form>
+                    <div className="flex justify-end">
+                        <Button type="submit"
+                                disabled={!form.formState.isValid || mutation.isPending}>
+                            {mutation.isPending ? "Sumibtting..." : "Submit"}
+                        </Button>
+                    </div>
+                    {
+                        mutation.error && <p className="text-destructive">{errorMessage}</p>
+                    }
+                </form>
+            </Form>
+        </div>
     );
 }
 
+function HiringCafeInput({onJobScraped}: { onJobScraped: (job: ScrapedJobDTO) => void }) {
+    const [url, setUrl] = useState<string | null>(null);
+    const hiringCafeMutation = useGetJobFromUrl();
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!url || !url.trim()) return;
+
+        try {
+            const result = await hiringCafeMutation.mutateAsync({data: {job_url: url}});
+            onJobScraped(result.data);
+        } catch (error) {
+            console.error("Error fetching job:", error);
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <Input
+                type="url"
+                placeholder="https://hiring.cafe/job/..."
+                value={url ?? ""}
+                onChange={(e) => setUrl(e.target.value)}
+                className="flex-1"
+            />
+            <Button type="submit" disabled={!url || hiringCafeMutation.isPending}>
+                {hiringCafeMutation.isPending ? "Fetching..." : "Fetch"}
+            </Button>
+        </form>
+    );
+}

@@ -11,6 +11,7 @@ from api.routers import (
     me_router,
     job_application_router,
     job_listing_router,
+    profile_router,
 )
 
 app = FastAPI()
@@ -37,9 +38,8 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(candidate_router, prefix="/candidates", tags=["candidate"])
 app.include_router(me_router, prefix="/me", tags=["me"])
 app.include_router(job_listing_router, prefix="/job-listings", tags=["job-listings"])
-app.include_router(
-    job_application_router, prefix="/job-applications", tags=["job-applications"]
-)
+app.include_router(job_application_router, prefix="/job-applications", tags=["job-applications"])
+app.include_router(profile_router, prefix="/profiles", tags=["profiles"])
 
 
 @app.get("/health")

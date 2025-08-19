@@ -5,7 +5,11 @@ from pydantic import HttpUrl
 from job_agent.services.job_listing_service import (
     JobService,
 )
-from job_agent.services.schemas import JobListingDTO, ScrapeJobListingRequest
+from job_agent.services.schemas import (
+    JobListingDTO,
+    ScrapeJobListingRequest,
+    ScrapedJobDTO,
+)
 from job_agent.models import JobListing
 from job_agent.services.exceptions import UnsupportedJobUrlException
 
@@ -42,15 +46,11 @@ async def test_fetch_job__should_work__with_valid_url(job_service, db_session):
     dto = await job_service.fetch_job(request)
 
     # Assert
-    assert isinstance(dto, JobListingDTO)
+    assert isinstance(dto, ScrapedJobDTO)
     assert dto.title == "Software Engineer"
     assert dto.application_url == "https://hiring.cafe/job/test123"
     assert dto.source == "HiringCafe"
     assert dto.description == "An exciting software role."
-
-    db_job = await db_session.get(JobListing, dto.id)
-    assert db_job is not None
-    assert db_job.application_url == "https://hiring.cafe/job/test123"
 
 
 @pytest.mark.asyncio
