@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from job_agent.features.base import Base, TimestampMixin
+from job_agent.features.common.base import Base, TimestampMixin
 
 from typing import TYPE_CHECKING
 
@@ -24,19 +24,19 @@ class Profile(TimestampMixin, Base):
     first_name: Mapped[str] = mapped_column(String(80), nullable=False)
     last_name: Mapped[str] = mapped_column(String(80), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
-    contact_phone: Mapped[str | None] = mapped_column(String(40), nullable=False)
+    contact_phone: Mapped[str] = mapped_column(String(40), nullable=False)
     work_location: Mapped[str | None] = mapped_column(String(160), nullable=True)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     candidate_id: Mapped[int] = mapped_column(ForeignKey("candidate.id"), nullable=False)
     candidate: Mapped["Candidate"] = relationship(back_populates="profile")
 
-    experiences: Mapped[list["ProfileExperience"]] = relationship(back_populates="profile")
-    educations: Mapped[list["ProfileEducation"]] = relationship(back_populates="profile")
-    projects: Mapped[list["ProfileProject"]] = relationship(back_populates="profile")
-    skills: Mapped[list["ProfileSkill"]] = relationship(back_populates="profile")
-    certifications: Mapped[list["ProfileCertification"]] = relationship(back_populates="profile")
-    links: Mapped[list["ProfileLink"]] = relationship(back_populates="profile")
+    experiences: Mapped[list["ProfileExperience"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    educations: Mapped[list["ProfileEducation"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    projects: Mapped[list["ProfileProject"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    skills: Mapped[list["ProfileSkill"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    certifications: Mapped[list["ProfileCertification"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    links: Mapped[list["ProfileLink"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
     # custom_sections: Mapped[list["ProfileCustomSection"]] = relationship(back_populates="profile")
 
     def __init__(
@@ -75,7 +75,7 @@ class ProfileExperience(TimestampMixin, Base):
 
     company: Mapped[str] = mapped_column(String(160), nullable=False)
     title: Mapped[str] = mapped_column(String(160), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
 
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
@@ -93,7 +93,7 @@ class ProfileExperience(TimestampMixin, Base):
         title: str,
         start_date: date,
         profile: Profile,
-        description: str | None = None,
+        description: str,
         end_date: date | None = None,
     ):
         super().__init__()
@@ -112,8 +112,8 @@ class ProfileEducation(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     school: Mapped[str] = mapped_column(String(160), nullable=False)
-    degree: Mapped[str | None] = mapped_column(String(50), nullable=False)
-    field: Mapped[str | None] = mapped_column(String(80), nullable=False)
+    degree: Mapped[str] = mapped_column(String(50), nullable=False)
+    field: Mapped[str | None] = mapped_column(String(80), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -130,7 +130,7 @@ class ProfileEducation(TimestampMixin, Base):
         school: str,
         start_date: date,
         profile: Profile,
-        degree: str | None = None,
+        degree: str,
         field: str | None = None,
         end_date: date | None = None,
         description: str | None = None,
@@ -152,7 +152,7 @@ class ProfileProject(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     name: Mapped[str] = mapped_column(String(160), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
     url: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     profile_id: Mapped[int] = mapped_column(ForeignKey("profile.id"), nullable=False)
@@ -162,7 +162,7 @@ class ProfileProject(TimestampMixin, Base):
         self,
         name: str,
         profile: Profile,
-        description: str | None = None,
+        description: str,
         url: str | None = None,
     ):
         super().__init__()

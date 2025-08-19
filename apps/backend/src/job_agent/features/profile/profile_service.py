@@ -1,3 +1,8 @@
+from typing import Optional
+
+from fastapi import HTTPException
+from openai import AsyncOpenAI
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -47,9 +52,10 @@ from job_agent.features.profile.profile_model import (
 from job_agent.features.candidate.candidate_model import Candidate
 from job_agent.services.exceptions import CandidateNotFoundException
 from job_agent.services.schemas import FileContent
+from job_agent.features.common import pdf
 
 
-class CreateFromResumeFormat:
+class CreateFromResumeFormat(BaseModel):
     profile: CreateProfileRequest
     experiences: list[CreateExperienceRequest] = []
     educations: list[CreateEducationRequest] = []
@@ -58,7 +64,7 @@ class CreateFromResumeFormat:
     certifications: list[CreateCertificationRequest] = []
 
 
-class UpdateFromResumeFormat:
+class UpdateFromResumeFormat(BaseModel):
     experiences: list[CreateExperienceRequest] = []
     educations: list[CreateEducationRequest] = []
     projects: list[CreateProjectRequest] = []
@@ -67,14 +73,107 @@ class UpdateFromResumeFormat:
 
 
 class ProfileService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, openai_client: Optional[AsyncOpenAI] = None):
         self._db = db
+        self._openai_client = openai_client
 
     async def create_from_resume(self, candidate_id: int, resume: FileContent) -> ProfileDTO:
-        pass
+        result = await self._db.execute(
+            select(Candidate).where(Candidate.id == candidate_id).options(selectinload(Candidate.profile))
+        )
+        candidate = result.scalar_one_or_none()
+
+        if candidate is None:
+            raise CandidateNotFoundException(candidate_id=candidate_id)
+
+        if candidate.profile is not None:
+            raise ProfileConflictException(candidate_id=candidate_id)
+
+        if self._openai_client is None:
+            raise HTTPException(status_code=500, detail="AI features are not available in this environment.")
+
+        resume_text = await pdf.pdf_to_text(resume.data)
+
+        response = await self._openai_client.responses.parse(
+            model="gpt-4o-mini",
+            input=[  # noqa
+                {"role": "system", "content": "Fill out the users profile fields based on relevant information from their resume. If required fields cannot be inferred use the exact string 'PLACEHOLDER' (without quotes)."},
+                {
+                    "role": "user",
+                    "content": f"Here is the resume: {resume_text}",
+                },
+            ],
+            text_format=CreateFromResumeFormat,
+        )
+
+        create_resume_request = response.output_parsed
+
+        if not create_resume_request:
+            raise HTTPException(status_code=400, detail="Failed to parse resume content.")
+
+        new_profile = Profile(
+            first_name=create_resume_request.profile.first_name,
+            last_name=create_resume_request.profile.last_name,
+            contact_email=str(create_resume_request.profile.contact_email),
+            candidate=candidate,
+            contact_phone=create_resume_request.profile.contact_phone,
+            work_location=create_resume_request.profile.work_location,
+            summary=create_resume_request.profile.summary,
+        )
+
+        self._db.add(new_profile)
+
+        for experience in create_resume_request.experiences:
+            new_experience = ProfileExperience(
+                company=experience.company,
+                title=experience.title,
+                start_date=experience.start_date,
+                description=experience.description,
+                end_date=experience.end_date,
+                profile=new_profile,
+            )
+            self._db.add(new_experience)
+
+        for education in create_resume_request.educations:
+            new_education = ProfileEducation(
+                school=education.school,
+                start_date=education.start_date,
+                profile=new_profile,
+                degree=education.degree,
+                field=education.field,
+                end_date=education.end_date,
+                description=education.description,
+            )
+            self._db.add(new_education)
+
+        for project in create_resume_request.projects:
+            new_project = ProfileProject(
+                name=project.name,
+                profile=new_profile,
+                description=project.description,
+                url=str(project.url) if project.url is not None else None,
+            )
+            self._db.add(new_project)
+
+        for skill in create_resume_request.skills:
+            new_skill = ProfileSkill(name=skill.name, profile=new_profile)
+            self._db.add(new_skill)
+
+        for certification in create_resume_request.certifications:
+            new_certification = ProfileCertification(
+                name=certification.name,
+                profile=new_profile,
+                issuer=certification.issuer,
+                date_issued=certification.date,
+            )
+            self._db.add(new_certification)
+
+        await self._db.commit()
+        return ProfileDTO.from_model(new_profile)
 
     async def update_from_resume(self, candidate_id: int, resume: FileContent) -> ProfileDTO:
-        pass
+        if self._openai_client is None:
+            raise HTTPException(status_code=500, detail="AI features are not available in this environment.")
 
     # ==== Profile ====
 

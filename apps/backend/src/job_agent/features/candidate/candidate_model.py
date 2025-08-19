@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from typing import TYPE_CHECKING
 
-from job_agent.features.base import Base
+from job_agent.features.common.base import Base
 
 if TYPE_CHECKING:
     from job_agent.features.file.file_model import StoredFile
@@ -29,7 +29,7 @@ class Candidate(Base):
     cover_letters: Mapped[List[CoverLetter]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
     applications: Mapped[List[JobApplication]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
 
-    profile: Mapped[Optional[Profile]] = relationship(back_populates="candidate")
+    profile: Mapped[Optional[Profile]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)

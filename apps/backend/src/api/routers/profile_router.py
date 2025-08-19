@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, HTTPException
 
 from api.auth import get_current_user_id
 from api.dependencies import get_profile_service
@@ -27,6 +27,7 @@ from job_agent.features.profile.profile_dto import (
     ProfileLinkDTO,
 )
 from job_agent.features.profile.profile_service import ProfileService
+from job_agent.services.schemas import FileContent
 
 profile_router = APIRouter()
 
@@ -40,6 +41,23 @@ async def create_profile(
     service: ProfileService = Depends(get_profile_service),
 ):
     return await service.create_profile(current_user_id, request)
+
+@profile_router.post("/create-from-resume", response_model=ProfileDTO, responses={409: {"model": ErrorModel}}, operation_id="createProfileFromResume")
+async def create_profile_from_resume(
+    file: UploadFile,
+    current_user_id: int = Depends(get_current_user_id),
+    service: ProfileService = Depends(get_profile_service),
+):
+    if file.content_type not in ["application/pdf"]:
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+
+    file_content = FileContent(
+        data=await file.read(),
+        content_type=file.content_type
+    )
+
+    return await service.create_from_resume(current_user_id, file_content)
+
 
 
 @profile_router.get("/", response_model=ProfileDTO, responses={404: {"model": ErrorModel}}, operation_id="getProfile")

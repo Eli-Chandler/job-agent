@@ -7,7 +7,7 @@ from typing import Optional
 from sqlalchemy import String, Text, DateTime, Enum as SqlEnum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
-from job_agent.features.base import Base
+from job_agent.features.common.base import Base
 
 from typing import TYPE_CHECKING
 

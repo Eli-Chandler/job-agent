@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, EmailStr, HttpUrl, Field
+# TODO: Replace URL 'str' with `HttpUrl`, didn't for now because openAI text_format doesn't support it but that is just a workaround
+from pydantic import BaseModel, EmailStr, Field
 
 from job_agent.features.profile.profile_model import (
     Profile,
@@ -64,7 +65,7 @@ class ProfileExperienceDTO(BaseModel):
     id: int
     company: str
     title: str
-    description: Optional[str]
+    description: str
     start_date: date
     end_date: Optional[date]
     is_current: bool
@@ -117,7 +118,7 @@ class ProfileEducationDTO(BaseModel):
 class ProfileProjectDTO(BaseModel):
     id: int
     name: str
-    description: Optional[str]
+    description: str
     url: Optional[str]
 
     created_at: datetime
@@ -201,7 +202,7 @@ class CreateProfileRequest(BaseModel):
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
     contact_email: EmailStr
-    contact_phone: Optional[str] = Field(None, min_length=1)
+    contact_phone: str = Field(..., min_length=1)
     work_location: Optional[str] = Field(None, min_length=1)
     summary: Optional[str] = None
 
@@ -225,8 +226,8 @@ class CreateEducationRequest(BaseModel):
 
 class CreateProjectRequest(BaseModel):
     name: str = Field(..., min_length=1)
-    description: Optional[str] = None
-    url: Optional[HttpUrl] = None
+    description: str = Field(..., min_length=1)
+    url: Optional[str] = None
 
 
 class CreateSkillRequest(BaseModel):
@@ -241,7 +242,7 @@ class CreateCertificationRequest(BaseModel):
 
 class CreateLinkRequest(BaseModel):
     label: str = Field(..., min_length=1)
-    url: HttpUrl
+    url: str
 
 
 # ============================
@@ -278,7 +279,7 @@ class UpdateEducationRequest(BaseModel):
 class UpdateProjectRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = None
-    url: Optional[HttpUrl] = None
+    url: Optional[str] = None
 
 
 class UpdateSkillRequest(BaseModel):
@@ -293,4 +294,4 @@ class UpdateCertificationRequest(BaseModel):
 
 class UpdateLinkRequest(BaseModel):
     label: Optional[str] = Field(None, min_length=1)
-    url: Optional[HttpUrl] = None
+    url: Optional[str] = None

@@ -6,7 +6,7 @@ from typing import Optional
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from job_agent.features.base import Base
+from job_agent.features.common.base import Base
 
 
 class StoredFile(Base):

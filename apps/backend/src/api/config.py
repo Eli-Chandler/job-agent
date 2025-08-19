@@ -26,9 +26,13 @@ class Settings(BaseSettings):
 
     mock_delay: bool = False
 
+    openai_api_key: str | None = None
+
     model_config = SettingsConfigDict(env_file=dotenv_path)
 
     environment: str = ENV
+
+
 
 
 settings = Settings()

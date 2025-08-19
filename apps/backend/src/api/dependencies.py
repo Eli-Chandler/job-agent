@@ -21,6 +21,8 @@ from botocore.config import Config
 from job_agent.services.resume_service import ResumeService
 from job_agent.services.s3_file_uploader import S3FileUploader
 
+from openai import AsyncOpenAI
+
 
 _session = aioboto3.Session()
 
@@ -70,6 +72,24 @@ async def get_resume_service(
 ) -> ResumeService:
     return ResumeService(db, s3_file_uploader)
 
+_OpenAIClient: Optional[AsyncOpenAI] = None
 
-async def get_profile_service(db: AsyncSession = Depends(get_db_session)) -> ProfileService:
-    return ProfileService(db)
+async def get_openai_client() -> Optional[AsyncOpenAI]:
+    global _OpenAIClient
+
+    if _OpenAIClient is not None:
+        return _OpenAIClient
+
+    if settings.openai_api_key is None:
+        return None
+
+    _OpenAIClient = AsyncOpenAI(
+        api_key=settings.openai_api_key
+    )
+    return _OpenAIClient
+
+async def get_profile_service(
+        db: AsyncSession = Depends(get_db_session),
+        openai_client: Optional[AsyncOpenAI] = Depends(get_openai_client)
+) -> ProfileService:
+    return ProfileService(db, openai_client)
