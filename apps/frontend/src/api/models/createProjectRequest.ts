@@ -4,12 +4,12 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateProjectRequestDescription } from './createProjectRequestDescription';
 import type { CreateProjectRequestUrl } from './createProjectRequestUrl';
 
 export interface CreateProjectRequest {
   /** @minLength 1 */
   name: string;
-  description?: CreateProjectRequestDescription;
+  /** @minLength 1 */
+  description: string;
   url?: CreateProjectRequestUrl;
 }

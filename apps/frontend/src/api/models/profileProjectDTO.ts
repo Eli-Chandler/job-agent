@@ -4,13 +4,12 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { ProfileProjectDTODescription } from './profileProjectDTODescription';
 import type { ProfileProjectDTOUrl } from './profileProjectDTOUrl';
 
 export interface ProfileProjectDTO {
   id: number;
   name: string;
-  description: ProfileProjectDTODescription;
+  description: string;
   url: ProfileProjectDTOUrl;
   created_at: string;
   updated_at: string;

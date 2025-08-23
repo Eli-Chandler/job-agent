@@ -2,6 +2,7 @@ import {useLocation, useNavigate} from "react-router";
 import {Card} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
 
+
 export type NavItem = {
     title: string;
     url: string;

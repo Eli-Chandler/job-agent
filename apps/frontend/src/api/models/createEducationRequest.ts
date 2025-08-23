@@ -4,7 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateEducationRequestDegree } from './createEducationRequestDegree';
 import type { CreateEducationRequestField } from './createEducationRequestField';
 import type { CreateEducationRequestEndDate } from './createEducationRequestEndDate';
 import type { CreateEducationRequestDescription } from './createEducationRequestDescription';
@@ -13,7 +12,7 @@ export interface CreateEducationRequest {
   /** @minLength 1 */
   school: string;
   start_date: string;
-  degree?: CreateEducationRequestDegree;
+  degree: string;
   field?: CreateEducationRequestField;
   end_date?: CreateEducationRequestEndDate;
   description?: CreateEducationRequestDescription;

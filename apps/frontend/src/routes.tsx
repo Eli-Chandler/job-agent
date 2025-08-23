@@ -3,7 +3,6 @@ import {
 } from "react-router";
 import Layout from "@/Layout";
 import App from "@/App.tsx";
-import HomePage from "@/pages/HomePage.tsx";
 import LoginPage from "@/pages/LoginPage.tsx";
 import {useUser} from "@/hooks/use-user.tsx";
 import DashboardOverview from "@/pages/dashboard/DashboardOverview.tsx";
@@ -19,10 +18,6 @@ export const router = createBrowserRouter([
                 element: <Layout/>,
                 children: [
                     {
-                        path: "/",
-                        element: <HomePage/>
-                    },
-                    {
                         path: "/login",
                         element: <LoginPage/>
                     },
@@ -30,7 +25,7 @@ export const router = createBrowserRouter([
                         element: <ProtectedRoute/>,
                         children: [
                             {
-                                path: "/dashboard",
+                                path: "/",
                                 element: <DashboardPage/>,
                                 children: [
                                     {

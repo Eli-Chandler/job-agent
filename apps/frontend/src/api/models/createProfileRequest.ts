@@ -4,7 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateProfileRequestContactPhone } from './createProfileRequestContactPhone';
 import type { CreateProfileRequestWorkLocation } from './createProfileRequestWorkLocation';
 import type { CreateProfileRequestSummary } from './createProfileRequestSummary';
 
@@ -14,7 +13,8 @@ export interface CreateProfileRequest {
   /** @minLength 1 */
   last_name: string;
   contact_email: string;
-  contact_phone?: CreateProfileRequestContactPhone;
+  /** @minLength 1 */
+  contact_phone: string;
   work_location?: CreateProfileRequestWorkLocation;
   summary?: CreateProfileRequestSummary;
 }

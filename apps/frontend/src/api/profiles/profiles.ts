@@ -31,6 +31,7 @@ import type {
 } from 'axios';
 
 import type {
+  BodyCreateProfileFromResume,
   CreateCertificationRequest,
   CreateEducationRequest,
   CreateExperienceRequest,
@@ -324,6 +325,69 @@ export const useUpdateProfile = <TError = AxiosError<ErrorModel | HTTPValidation
       > => {
 
       const mutationOptions = getUpdateProfileMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * @summary Create Profile From Resume
+ */
+export const createProfileFromResume = (
+    bodyCreateProfileFromResume: BodyCreateProfileFromResume, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ProfileDTO>> => {
+    
+    const formData = new FormData();
+formData.append(`file`, bodyCreateProfileFromResume.file)
+
+    return axios.default.post(
+      `/profiles/create-from-resume`,
+      formData,options
+    );
+  }
+
+
+
+export const getCreateProfileFromResumeMutationOptions = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProfileFromResume>>, TError,{data: BodyCreateProfileFromResume}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof createProfileFromResume>>, TError,{data: BodyCreateProfileFromResume}, TContext> => {
+
+const mutationKey = ['createProfileFromResume'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProfileFromResume>>, {data: BodyCreateProfileFromResume}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createProfileFromResume(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProfileFromResumeMutationResult = NonNullable<Awaited<ReturnType<typeof createProfileFromResume>>>
+    export type CreateProfileFromResumeMutationBody = BodyCreateProfileFromResume
+    export type CreateProfileFromResumeMutationError = AxiosError<ErrorModel | HTTPValidationError>
+
+    /**
+ * @summary Create Profile From Resume
+ */
+export const useCreateProfileFromResume = <TError = AxiosError<ErrorModel | HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProfileFromResume>>, TError,{data: BodyCreateProfileFromResume}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createProfileFromResume>>,
+        TError,
+        {data: BodyCreateProfileFromResume},
+        TContext
+      > => {
+
+      const mutationOptions = getCreateProfileFromResumeMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }

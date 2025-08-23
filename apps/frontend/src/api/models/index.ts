@@ -6,6 +6,7 @@
  */
 
 export * from './addOrUpdateSocialRequest';
+export * from './bodyCreateProfileFromResume';
 export * from './bodyLoginAuthTokenPost';
 export * from './bodyLoginAuthTokenPostClientId';
 export * from './bodyLoginAuthTokenPostClientSecret';

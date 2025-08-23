@@ -211,14 +211,14 @@ class CreateExperienceRequest(BaseModel):
     company: str = Field(..., min_length=1)
     title: str = Field(..., min_length=1)
     start_date: date
-    description: Optional[str] = None
+    description: str
     end_date: Optional[date] = None
 
 
 class CreateEducationRequest(BaseModel):
     school: str = Field(..., min_length=1)
     start_date: date
-    degree: Optional[str] = None
+    degree: str
     field: Optional[str] = None
     end_date: Optional[date] = None
     description: Optional[str] = None

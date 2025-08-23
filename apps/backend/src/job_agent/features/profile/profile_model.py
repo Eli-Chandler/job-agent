@@ -45,7 +45,7 @@ class Profile(TimestampMixin, Base):
         last_name: str,
         contact_email: str,
         candidate: Candidate,
-        contact_phone: str | None = None,
+        contact_phone: str,
         work_location: str | None = None,
         summary: str | None = None,
     ):

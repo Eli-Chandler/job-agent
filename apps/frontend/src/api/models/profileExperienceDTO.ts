@@ -4,14 +4,13 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { ProfileExperienceDTODescription } from './profileExperienceDTODescription';
 import type { ProfileExperienceDTOEndDate } from './profileExperienceDTOEndDate';
 
 export interface ProfileExperienceDTO {
   id: number;
   company: string;
   title: string;
-  description: ProfileExperienceDTODescription;
+  description: string;
   start_date: string;
   end_date: ProfileExperienceDTOEndDate;
   is_current: boolean;

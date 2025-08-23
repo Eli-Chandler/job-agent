@@ -4,7 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateExperienceRequestDescription } from './createExperienceRequestDescription';
 import type { CreateExperienceRequestEndDate } from './createExperienceRequestEndDate';
 
 export interface CreateExperienceRequest {
@@ -13,6 +12,6 @@ export interface CreateExperienceRequest {
   /** @minLength 1 */
   title: string;
   start_date: string;
-  description?: CreateExperienceRequestDescription;
+  description: string;
   end_date?: CreateExperienceRequestEndDate;
 }

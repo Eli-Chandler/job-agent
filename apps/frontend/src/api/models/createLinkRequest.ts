@@ -8,9 +8,5 @@
 export interface CreateLinkRequest {
   /** @minLength 1 */
   label: string;
-  /**
-   * @minLength 1
-   * @maxLength 2083
-   */
   url: string;
 }

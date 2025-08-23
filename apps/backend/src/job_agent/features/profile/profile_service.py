@@ -175,6 +175,8 @@ class ProfileService:
         if self._openai_client is None:
             raise HTTPException(status_code=500, detail="AI features are not available in this environment.")
 
+        raise NotImplementedError("Update from resume is not implemented yet.")
+
     # ==== Profile ====
 
     async def create_profile(self, candidate_id: int, request: CreateProfileRequest) -> ProfileDTO:
@@ -247,11 +249,11 @@ class ProfileService:
 
         if "first_name" in updates and request.first_name is not None:
             profile.first_name = request.first_name
-        if "last_name" in updates and request.last_name is not None:
+        if "last_name" in updates and request.last_name:
             profile.last_name = request.last_name
         if "contact_email" in updates and request.contact_email is not None:
             profile.contact_email = str(request.contact_email)
-        if "contact_phone" in updates:
+        if "contact_phone" in updates and request.contact_phone is not None:
             profile.contact_phone = request.contact_phone
         if "work_location" in updates:
             profile.work_location = request.work_location
@@ -313,7 +315,7 @@ class ProfileService:
             experience.company = request.company
         if "title" in updates and request.title is not None:
             experience.title = request.title
-        if "description" in updates:
+        if "description" in updates and request.description is not None:
             experience.description = request.description
         if "start_date" in updates and request.start_date is not None:
             experience.start_date = request.start_date
@@ -378,11 +380,11 @@ class ProfileService:
 
         if "school" in updates and request.school is not None:
             education.school = request.school
-        if "degree" in updates:
+        if "degree" in updates and request.degree is not None:
             education.degree = request.degree
         if "field" in updates:
             education.field = request.field
-        if "start_date" in updates and request.start_date is not None:
+        if "start_date" in updates and request.start_date:
             education.start_date = request.start_date
         if "end_date" in updates:
             education.end_date = request.end_date
@@ -444,7 +446,7 @@ class ProfileService:
 
         if "name" in updates and request.name is not None:
             project.name = request.name
-        if "description" in updates:
+        if "description" in updates and request.description is not None:
             project.description = request.description
         if "url" in updates:
             project.url = str(request.url) if request.url is not None else None

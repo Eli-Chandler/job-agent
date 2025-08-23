@@ -5,7 +5,7 @@ import {JobAgentLogo} from "@/components/ui/job-agent-logo.tsx";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Label} from "@/components/ui/label.tsx";
 import {IconInput} from "@/components/ui/icon-input.tsx";
-import {LockIcon, MailIcon, PhoneIcon, UserIcon} from "lucide-react";
+import {LockIcon, MailIcon, UserIcon} from "lucide-react";
 import {useState} from "react";
 import {useLoginAuthTokenPost, useRegisterAuthRegisterPost} from "@/api/auth/auth.ts";
 import {useUser} from "@/hooks/use-user.tsx";
@@ -51,7 +51,6 @@ function SignupTab() {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -72,14 +71,13 @@ function SignupTab() {
         }
     });
 
-    const isFormValid = firstName && lastName && email && phone && password && confirmPassword && password === confirmPassword;
+    const isFormValid = firstName && lastName && email && password && confirmPassword && password === confirmPassword;
 
     async function handleSubmit() {
         mutation.mutate({
             data: {
                 first_name: firstName,
                 last_name: lastName,
-                phone: phone,
                 email: email,
                 password: password
             }
@@ -124,21 +122,6 @@ function SignupTab() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="johndoe@example.com"
                 />
-            </div>
-
-            <div className="flex flex-col gap-2">
-                <Label htmlFor="phone">Phone</Label>
-                <IconInput
-                    id="phone"
-                    type="text"
-                    icon={PhoneIcon}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 23 456 7890"
-                />
-                <p className="text-xs text-muted-foreground">
-                    Used for filling out job applications, we will not contact you.
-                </p>
             </div>
 
             <div className="flex flex-col gap-2">
