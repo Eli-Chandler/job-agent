@@ -43,7 +43,7 @@ export default function ProfileLinks() {
     }
 
     return (
-        <Card className="w-full max-w-xl">
+        <Card className="w-full">
             <CardHeader>
                 <div className="flex justify-between">
                     <div>

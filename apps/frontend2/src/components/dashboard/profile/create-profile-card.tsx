@@ -26,7 +26,7 @@ export default function CreateProfileCard() {
     const [isGenerating, setIsGenerating] = useState(false);
 
     return (
-        <Card className="max-w-xl mx-auto w-full relative overflow-hidden">
+        <Card className="w-full relative overflow-hidden">
             {/* Loading overlay */}
             {isGenerating && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-background/70 backdrop-blur-sm">

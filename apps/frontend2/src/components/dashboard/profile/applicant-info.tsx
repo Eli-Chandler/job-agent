@@ -61,7 +61,7 @@ export default function ApplicantInfo() {
 
 
     return (
-        <Card className="max-w-xl w-full">
+        <Card className="w-full">
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>

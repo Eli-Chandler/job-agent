@@ -12,7 +12,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {JobAgentLogo} from "@/components/ui/job-agent-logo.tsx";
-import {ChevronUp, HouseIcon, User2} from "lucide-react";
+import {
+    ChevronUp,
+    HouseIcon,
+    PlusCircleIcon,
+    User2
+} from "lucide-react";
 import {UserIcon} from "lucide-react";
 import {Link} from "react-router";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -31,7 +36,7 @@ const items = [
         title: "Profile",
         url: "/dashboard/profile",
         icon: UserIcon,
-    },
+    }
 ]
 
 export function AppNavigation() {
@@ -62,6 +67,14 @@ export function AppNavigation() {
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 ))}
+                                <SidebarMenuItem key="apply">
+                                    <SidebarMenuButton asChild>
+                                        <Link to={"/dashboard/apply"}>
+                                            <PlusCircleIcon className="text-primary"/>
+                                            <span className="text-primary">Apply</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>

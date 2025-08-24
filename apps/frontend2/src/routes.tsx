@@ -7,6 +7,7 @@ import DashboardPage from "@/pages/dashboard/dashboard-page.tsx";
 import DashboardOverview from "@/pages/dashboard/dashboard-overview.tsx";
 import {useGetCurrentlyAuthenticatedUser} from "@/api/me/me.ts";
 import DashboardProfile from "@/pages/dashboard/dashboard-profile.tsx";
+import DashboardApply from "@/pages/dashboard/dashboard-apply.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
                                 path: "profile",
                                 element: <DashboardProfile/>
                             },
+                            {
+                                path: "apply",
+                                element: <DashboardApply/>
+                            }
                             // {
                             //     path: "applications"
                             // },

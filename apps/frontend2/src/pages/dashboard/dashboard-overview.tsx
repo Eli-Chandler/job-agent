@@ -1,5 +1,5 @@
 import {useGetCurrentlyAuthenticatedUser} from "@/api/me/me.ts";
-import {DashboardHeader} from "@/components/dashboard/dashboard-header.tsx";
+import {DashboardHeader} from "@/components/dashboard/dashboard.tsx";
 
 export default function DashboardOverview() {
     const {data, isLoading, isFetching, isError, error} = useGetCurrentlyAuthenticatedUser();

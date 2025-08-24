@@ -1,4 +1,4 @@
-import {DashboardHeader} from "@/components/dashboard/dashboard-header.tsx";
+import {Dashboard, DashboardContent, DashboardHeader} from "@/components/dashboard/dashboard.tsx";
 import ProfileLinks from "@/components/dashboard/profile/profile-links.tsx";
 import {useDeleteProfile, useGetProfile} from "@/api/profiles/profiles.ts";
 import CreateProfileCard from "@/components/dashboard/profile/create-profile-card.tsx";
@@ -16,22 +16,24 @@ export default function DashboardProfile() {
     const hasProfile = !(isError && error?.status === 404);
 
     return (
-        <div className="flex flex-col gap-2 w-full">
+        <Dashboard>
             <DashboardHeader title="Profile"/>
-            {
-                hasProfile ?
-                    <ProfileContent/>
-                    :
-                    <CreateProfileCard/>
-            }
-            <DeleteProfileButton/>
-        </div>
+            <DashboardContent>
+                {
+                    hasProfile ?
+                        <ProfileContent/>
+                        :
+                        <CreateProfileCard/>
+                }
+                <DeleteProfileButton/>
+            </DashboardContent>
+        </Dashboard>
     );
 }
 
 function ProfileContent() {
     return (
-        <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 w-full">
+        <div className="mx-auto grid grid-cols-1 gap-4 w-full">
             <ApplicantInfo/>
             <ProfileEducations/>
             <ProfileLinks/>

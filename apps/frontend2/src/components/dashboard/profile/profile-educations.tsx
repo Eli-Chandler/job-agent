@@ -38,7 +38,7 @@ export default function ProfileEducations() {
     }
 
     return (
-        <Card className="w-full max-w-xl">
+        <Card className="w-full">
             <CardHeader>
                 <div className="flex justify-between">
                     <div>
